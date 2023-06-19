@@ -9,6 +9,8 @@
     "license": "MIT",
     "devDependencies": {
         "@types/jest": "^22.1.1",
+        "@types/jscodeshift": "^0.11.6",
+        "@types/prettier": "^2.7.3",
         "jest": "^22.1.4",
         "ts-jest": "^22.0.2",
         "typescript": "^2.7.1"
@@ -16,5 +18,9 @@
     "scripts": {
         "compile": "tsc",
         "test": "jest --env=node --colors -- test"
+    },
+    "dependencies": {
+        "jscodeshift": "^0.15.0",
+        "prettier": "^2.8.8"
     }
 }
