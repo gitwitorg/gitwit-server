@@ -53,8 +53,8 @@ export const transformAppFile = (root: j.Collection) => {
 };
 
 export default (files: FileList) => {
-  if (files["App.tsx"]) {
-    return { "App.tsx": applyTransform(files["App.tsx"], transformAppFile) }
+  if (files["/App.tsx"]) {
+    return { "/App.tsx": applyTransform(files["/App.tsx"], transformAppFile) }
   }
   return {}
 }
