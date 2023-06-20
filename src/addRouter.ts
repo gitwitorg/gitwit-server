@@ -4,6 +4,7 @@ import { FileList } from "./types"
 
 const IMPORTS = `
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Home, About, Contact } from './pages';
 `
 
 const CONSTANTS = `
@@ -56,19 +57,31 @@ function Navbar() {
     </nav>
   );
 }
+`;
 
-function Home() {
+const HOME = `\
+export const Home = () => {
   return <h2>Home</h2>;
 }
+`
 
-function About() {
+const ABOUT = `\
+export const About = () => {
   return <h2>About</h2>;
 }
+`
 
-function Contact() {
+const CONTACT = `\
+export const Contact = () => {
   return <h2>Contact</h2>;
 }
-`;
+`
+
+const INDEX = `\
+export { Home } from "./Home";
+export { About } from "./About";
+export { Contact } from "./Contact";
+`
 
 export const transformAppFile = (root: j.Collection) => {
 
@@ -93,5 +106,9 @@ export default (files: FileList) => {
   if (files["/package.json"]) {
     transformedFiles["/package.json"] = addDependency(files["/package.json"], "react-router-dom", "*")
   }
+  transformedFiles["/pages/Home.js"] = HOME;
+  transformedFiles["/pages/About.js"] = ABOUT;
+  transformedFiles["/pages/Contact.js"] = CONTACT;
+  transformedFiles["pages/index.js"] = INDEX;
   return transformedFiles;
 }
