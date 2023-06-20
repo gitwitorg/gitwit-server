@@ -18,9 +18,10 @@
         "typescript": "^5.1.3"
     },
     "scripts": {
-        "compile": "tsc",
+        "install": "tsc",
         "test": "jest --env=node --colors -- test",
-        "dev": "tsc --watch & nodemon ./lib/server.js"
+        "dev": "tsc --watch & nodemon ./lib/server.js",
+        "start": "node ./lib/server.js"
     },
     "dependencies": {
         "cors": "^2.8.5",
