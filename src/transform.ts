@@ -4,9 +4,9 @@ import addFirebaseAuth from "./addFirebaseAuth";
 import addForm from "./addForm";
 import { FileList } from "./types"
 
-export function transformFiles(files: FileList, transformation: string) {
+export function transformFiles(files: FileList, transformation: string, activeFile: string) {
   if (transformation === "addDatePicker") {
-    return addDatePicker(files);
+    return addDatePicker(files, activeFile);
   }
   else if (transformation === "addRouter") {
     return addRouter(files);

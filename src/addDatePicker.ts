@@ -3,8 +3,8 @@ import { applyTransform, addDependency, addImports, addHooks, addComponent } fro
 import { FileList } from "./types"
 
 const IMPORTS = `import { useState } from "react";
-  import DatePicker from "react-datepicker";
-  import "react-datepicker/dist/react-datepicker.css";`
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";`
 
 const HOOKS = `
 // State to store the selected date
@@ -34,10 +34,10 @@ export const transformAppFile = (root: j.Collection) => {
   return root;
 };
 
-export default (files: FileList) => {
+export default (files: FileList, activeFile: string) => {
   let transformedFiles: FileList = {};
-  if (files["/App.js"]) {
-    transformedFiles["/App.js"] = applyTransform(files["/App.js"], transformAppFile);
+  if (files[activeFile]) {
+    transformedFiles[activeFile] = applyTransform(files[activeFile], transformAppFile);
   }
   if (files["/package.json"]) {
     transformedFiles["/package.json"] = addDependency(files["/package.json"], "react-datepicker", "*")

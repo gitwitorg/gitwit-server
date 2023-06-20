@@ -1,5 +1,5 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency, addImports, addComponent } from './utils'
+import { applyTransform, addDependency, addImports, addComponent, formatCode } from './utils'
 import { FileList } from "./types"
 
 const IMPORTS = `
@@ -60,27 +60,29 @@ function Navbar() {
 `;
 
 const HOME = `\
-export const Home = () => {
-  return <h2>Home</h2>;
+export default function Home() {
+  return (<div><h2>Home</h2></div>);
 }
 `
 
 const ABOUT = `\
-export const About = () => {
-  return <h2>About</h2>;
+export default function About() {
+  return (<div><h2>About</h2></div>);
 }
 `
 
 const CONTACT = `\
-export const Contact = () => {
-  return <h2>Contact</h2>;
+export default function Contact() {
+  return (<div><h2>Contact</h2></div>);
 }
 `
 
 const INDEX = `\
-export { Home } from "./Home";
-export { About } from "./About";
-export { Contact } from "./Contact";
+import Home from "./Home";
+import About from "./About";
+import Contact from "./Contact";
+
+export { Home, About, Contact };
 `
 
 export const transformAppFile = (root: j.Collection) => {
@@ -106,9 +108,9 @@ export default (files: FileList) => {
   if (files["/package.json"]) {
     transformedFiles["/package.json"] = addDependency(files["/package.json"], "react-router-dom", "*")
   }
-  transformedFiles["/pages/Home.js"] = HOME;
-  transformedFiles["/pages/About.js"] = ABOUT;
-  transformedFiles["/pages/Contact.js"] = CONTACT;
-  transformedFiles["pages/index.js"] = INDEX;
+  transformedFiles["/pages/Home.js"] = formatCode(HOME);
+  transformedFiles["/pages/About.js"] = formatCode(ABOUT);
+  transformedFiles["/pages/Contact.js"] = formatCode(CONTACT);
+  transformedFiles["pages/index.js"] = formatCode(INDEX);
   return transformedFiles;
 }
