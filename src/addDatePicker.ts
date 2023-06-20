@@ -1,4 +1,6 @@
 import j from 'jscodeshift'
+import { applyTransform } from './utils'
+import { FileList } from "./types"
 
 const IMPORTS = `
 import React, { useState } from "react";
@@ -22,7 +24,7 @@ const COMPONENT = `
 />
 `;
 
-export const addDatePicker = (root: j.Collection) => {
+export const transformAppFile = (root: j.Collection) => {
 
   // Find existing imports
   const importDeclaration = root.find(j.ImportDeclaration);
@@ -49,3 +51,10 @@ export const addDatePicker = (root: j.Collection) => {
 
   return root;
 };
+
+export default (files: FileList) => {
+  if (files["App.tsx"]) {
+    return { "App.tsx": applyTransform(files["App.tsx"], transformAppFile) }
+  }
+  return {}
+}

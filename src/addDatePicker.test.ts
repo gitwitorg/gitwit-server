@@ -1,12 +1,12 @@
 import j from 'jscodeshift'
-import { addDatePicker } from "./addDatePicker";
+import { transformAppFile } from "./addDatePicker";
 import { toString } from "./utils";
 
 //
 // The transformation
 //
 
-const transformation = addDatePicker;
+const transformation = transformAppFile;
 const transformationName = "Add Date picker";
 
 //
