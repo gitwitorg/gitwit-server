@@ -34,3 +34,23 @@ export const addImports = (root: j.Collection, block: string) => {
   }
   addImportStatements(root, j(block).find(j.Statement).nodes());
 }
+
+export const addHooks = (root: j.Collection, block: string) => {
+  // Find the default export
+  const appExport = root.find(j.ExportDefaultDeclaration);
+  const returnStament = appExport.find(j.ReturnStatement);
+
+  // Insert the hooks before the return statement
+  returnStament.at(0).insertBefore(block);
+}
+
+export const addComponent = (root: j.Collection, block: string) => {
+  // Find the default export
+  const appExport = root.find(j.ExportDefaultDeclaration);
+  const returnStament = appExport.find(j.ReturnStatement);
+
+  // Insert the new component add the end of the first JSX element
+  returnStament.find(j.JSXElement).at(0)
+    .childNodes().at(-1)
+    .insertAfter(block);
+}

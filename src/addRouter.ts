@@ -1,5 +1,5 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency, addImports } from './utils'
+import { applyTransform, addDependency, addImports, addComponent } from './utils'
 import { FileList } from "./types"
 
 const IMPORTS = `
@@ -74,19 +74,13 @@ export const transformAppFile = (root: j.Collection) => {
 
   addImports(root, IMPORTS)
 
-  // Find the default export
+  // Add the constants and functions
   const appExport = root.find(j.ExportDefaultDeclaration);
-
   appExport.insertBefore(CONSTANTS);
   appExport.insertBefore(FUNCTIONS);
 
-  // Find the return statement
-  const returnStament = appExport.find(j.ReturnStatement);
-
-  // Insert the new component add the end of the first JSX element
-  returnStament.find(j.JSXElement).at(0)
-    .childNodes().at(-1)
-    .insertAfter(COMPONENT);
+  // Add the Router component
+  addComponent(root, COMPONENT)
 
   return root;
 };

@@ -1,5 +1,5 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency, addImports } from './utils'
+import { applyTransform, addDependency, addImports, addHooks, addComponent } from './utils'
 import { FileList } from "./types"
 
 const IMPORTS = `import { useState } from "react";
@@ -28,18 +28,8 @@ const COMPONENT = `
 export const transformAppFile = (root: j.Collection) => {
 
   addImports(root, IMPORTS)
-
-  // Find the default export
-  const appExport = root.find(j.ExportDefaultDeclaration);
-  const returnStament = appExport.find(j.ReturnStatement);
-
-  // Insert the hooks before the return statement
-  returnStament.at(0).insertBefore(HOOKS);
-
-  // Insert the new component add the end of the first JSX element
-  returnStament.find(j.JSXElement).at(0)
-    .childNodes().at(-1)
-    .insertAfter(COMPONENT);
+  addHooks(root, HOOKS)
+  addComponent(root, COMPONENT)
 
   return root;
 };
