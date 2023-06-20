@@ -17,7 +17,6 @@ app.get('/', (req: Request, res: Response) => {
 // Define an API endpoint for code transformation
 app.post("/transform", async (req: Request, res: Response) => {
     try {
-        console.log(req.body)
         const modifiedCode = transformFiles(req.body.files, req.body.transformation);
         res.json(modifiedCode);
     } catch (error) {

@@ -1,9 +1,13 @@
 import addDatePicker from "./addDatePicker";
+import addRouter from "./addRouter";
 import { FileList } from "./types"
 
 export function transformFiles(files: FileList, transformation: string) {
   if (transformation === "addDatePicker") {
     return addDatePicker(files);
+  }
+  else if (transformation === "addRouter") {
+    return addRouter(files);
   }
   throw new Error("Unknown transformation");
 }
