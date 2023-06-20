@@ -14,9 +14,9 @@ export const toString = (ast: j.Collection) => formatCode(
 )
 
 // Apply an AST transformation to the contents of a file
-export const applyTransform = (code: string, transform: Function) =>
+export const applyTransform = (code: string, transform: Function, options = {}) =>
   formatCode(
-    transform(j(code))
+    transform(j(code), options)
       .toSource()
   )
 

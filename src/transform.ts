@@ -15,7 +15,7 @@ export function transformFiles(files: FileList, transformation: string, activeFi
     return addFirebaseAuth(files);
   }
   else if (transformation === "addForm") {
-    return addForm(files);
+    return addForm(files, activeFile);
   }
   throw new Error("Unknown transformation");
 }

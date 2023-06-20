@@ -41,6 +41,7 @@ export default (files: FileList, activeFile: string) => {
       transformedFiles[activeFile] = applyTransform(files[activeFile], transformAppFile);
     }
     catch (e) {
+      console.log(e)
       throw new Error(`${activeFile}: You can't put that component here!`)
     }
   }

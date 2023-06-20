@@ -45,10 +45,6 @@ const useAjaxForm = (url) => {
 export default useAjaxForm;
 `
 
-const IMPORTS = `
-import useAjaxForm from './utils/useAjaxForm';
-`
-
 const HOOKS = `
 const apiBaseUrl = 'https://reqres.in/api/login';
 const { formData, isLoading, error, handleSubmit, handleChange } = useAjaxForm(apiBaseUrl);
@@ -73,7 +69,11 @@ const COMPONENT = `\
 {error && <p>Error: {error.message}</p>}
 `;
 
-export const transformAppFile = (root: j.Collection) => {
+export const transformAppFile = (root: j.Collection, { importPath }: { importPath: string }) => {
+
+  const IMPORTS = `
+  import useAjaxForm from '${importPath}utils/useAjaxForm';
+  `
 
   addImports(root, IMPORTS)
   addHooks(root, HOOKS)
@@ -82,10 +82,18 @@ export const transformAppFile = (root: j.Collection) => {
   return root;
 };
 
-export default (files: FileList) => {
+export default (files: FileList, activeFile: string) => {
   let transformedFiles: FileList = {};
-  if (files["/App.js"]) {
-    transformedFiles["/App.js"] = applyTransform(files["/App.js"], transformAppFile);
+  if (files[activeFile]) {
+    try {
+      const distance = activeFile.split("/").length - 1;
+      const importPath = distance > 1 ? "../".repeat(distance - 1) : "./"
+      transformedFiles[activeFile] = applyTransform(files[activeFile], transformAppFile, { importPath });
+    }
+    catch (e) {
+      console.log(e)
+      throw new Error(`${activeFile}: You can't put that component here!`)
+    }
   }
   if (files["/package.json"]) {
     transformedFiles["/package.json"] = addDependency(files["/package.json"], "firebase", "*")
