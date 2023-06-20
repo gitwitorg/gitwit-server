@@ -37,7 +37,12 @@ export const transformAppFile = (root: j.Collection) => {
 export default (files: FileList, activeFile: string) => {
   let transformedFiles: FileList = {};
   if (files[activeFile]) {
-    transformedFiles[activeFile] = applyTransform(files[activeFile], transformAppFile);
+    try {
+      transformedFiles[activeFile] = applyTransform(files[activeFile], transformAppFile);
+    }
+    catch (e) {
+      throw new Error(`${activeFile}: You can't put that component here!`)
+    }
   }
   if (files["/package.json"]) {
     transformedFiles["/package.json"] = addDependency(files["/package.json"], "react-datepicker", "*")

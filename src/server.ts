@@ -19,9 +19,9 @@ app.post("/transform", async (req: Request, res: Response) => {
     try {
         const modifiedCode = transformFiles(req.body.files, req.body.transformation, req.body.activeFile);
         res.json(modifiedCode);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error:", error);
-        res.status(500).json({ error });
+        res.status(500).json({ error: error.message });
     }
 });
 
