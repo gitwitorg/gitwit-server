@@ -414,7 +414,7 @@
     "@babel/parser" "^7.22.5"
     "@babel/types" "^7.22.5"
 
-"@babel/traverse@^7.22.5", "@babel/traverse@^7.7.2":
+"@babel/traverse@^7.22.5", "@babel/traverse@^7.4.5", "@babel/traverse@^7.7.2":
   version "7.22.5"
   resolved "https://registry.npmjs.org/@babel/traverse/-/traverse-7.22.5.tgz"
   integrity sha512-7DuIjPgERaNo6r+PZwItpjCZEa5vyw4eJGufeLxrPdBXBoLcCJCIasvK6pK/9DVNrLZTLFhUGqaC6X/PA007TQ==
@@ -2401,6 +2401,19 @@ js-yaml@^3.13.1:
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
+
+jscodeshift-add-imports@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/jscodeshift-add-imports/-/jscodeshift-add-imports-1.0.10.tgz#3d0f99d539d492cfa037aa4a63f04c4a626bcff5"
+  integrity sha512-VUe9DJ3zkWIR62zSRQnmsOVeyt77yD8knvYNna/PzRZlF9j799hJw5sqTZu4EX16XLIqS3FxWz3nXuGuiw9iyQ==
+  dependencies:
+    "@babel/traverse" "^7.4.5"
+    jscodeshift-find-imports "^2.0.2"
+
+jscodeshift-find-imports@^2.0.2:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/jscodeshift-find-imports/-/jscodeshift-find-imports-2.0.4.tgz#4dc427bff6c8f8c6c766a19043cdbee4e1d10782"
+  integrity sha512-HxOzjWDOFFSCf8EKSTQGqCxXeRFqZszOywnZ0HuMB9YPDFHVpxftGRsY+QS+Qq8o2qUojlmNU3JEHts5DWYS1A==
 
 jscodeshift@^0.15.0:
   version "0.15.0"

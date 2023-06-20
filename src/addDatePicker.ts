@@ -1,12 +1,10 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency } from './utils'
+import { applyTransform, addDependency, addImports } from './utils'
 import { FileList } from "./types"
 
-const IMPORTS = `
-import React, { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css"
-`
+const IMPORTS = `import { useState } from "react";
+  import DatePicker from "react-datepicker";
+  import "react-datepicker/dist/react-datepicker.css";`
 
 const HOOKS = `
 // State to store the selected date
@@ -29,16 +27,7 @@ const COMPONENT = `
 
 export const transformAppFile = (root: j.Collection) => {
 
-  // Find existing imports
-  const importDeclaration = root.find(j.ImportDeclaration);
-  // Insert the imports after the last existing import
-  if (importDeclaration.length) {
-    importDeclaration.at(-1).insertAfter(IMPORTS);
-  }
-  // Add the imports to the beginnning of the file
-  else {
-    root.find(j.Program).get('body', 0).insertBefore(IMPORTS);
-  }
+  addImports(root, IMPORTS)
 
   // Find the default export
   const appExport = root.find(j.ExportDefaultDeclaration);

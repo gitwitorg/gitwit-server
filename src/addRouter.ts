@@ -1,5 +1,5 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency } from './utils'
+import { applyTransform, addDependency, addImports } from './utils'
 import { FileList } from "./types"
 
 const IMPORTS = `
@@ -72,16 +72,7 @@ function Contact() {
 
 export const transformAppFile = (root: j.Collection) => {
 
-  // Find existing imports
-  const importDeclaration = root.find(j.ImportDeclaration);
-  // Insert the imports after the last existing import
-  if (importDeclaration.length) {
-    importDeclaration.at(-1).insertAfter(IMPORTS);
-  }
-  // Add the imports to the beginnning of the file
-  else {
-    root.find(j.Program).get('body', 0).insertBefore(IMPORTS);
-  }
+  addImports(root, IMPORTS)
 
   // Find the default export
   const appExport = root.find(j.ExportDefaultDeclaration);
