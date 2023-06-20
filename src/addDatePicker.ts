@@ -9,14 +9,17 @@ import "react-datepicker/dist/react-datepicker.css"
 `
 
 const HOOKS = `
+// State to store the selected date
 const [selectedDate, setSelectedDate] = useState(null);
 
+// Event handler for date change
 const handleDateChange = (date) => {
   setSelectedDate(date);
 };
 `;
 
 const COMPONENT = `
+{/* DatePicker component */}
 <DatePicker
   selected={selectedDate}
   onChange={handleDateChange}

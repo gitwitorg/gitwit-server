@@ -29,8 +29,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function App() {
+  // State to store the selected date
   const [selectedDate, setSelectedDate] = useState(null);
 
+  // Event handler for date change
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
@@ -38,6 +40,7 @@ export default function App() {
   return (
     <div>
       <h1>Hello world</h1>
+      {/* DatePicker component */}
       <DatePicker
         selected={selectedDate}
         onChange={handleDateChange}
