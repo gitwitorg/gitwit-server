@@ -3,33 +3,13 @@ import { applyTransform, addDependency, addImports, addComponent, formatCode } f
 import { FileList } from "./types"
 
 const IMPORTS = `
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Home, About, Contact } from './pages';
-`
-
-const CONSTANTS = `
-const pages = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    component: About
-  },
-  {
-    path: '/contact',
-    name: 'Contact',
-    component: Contact
-  }
-];
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { pages } from './pages';
 `
 
 const COMPONENT = `
 {/* Router component */}
-<Router>
+<BrowserRouter>
   <Navbar />
   <Routes>
     {pages.map((page, index) => (
@@ -40,7 +20,7 @@ const COMPONENT = `
       />
     ))}
   </Routes>
-</Router>
+</BrowserRouter>
 `;
 
 const FUNCTIONS = `
@@ -82,7 +62,23 @@ import Home from "./Home";
 import About from "./About";
 import Contact from "./Contact";
 
-export { Home, About, Contact };
+export const pages = [
+  {
+    path: "/",
+    name: "Home",
+    component: Home,
+  },
+  {
+    path: "/about",
+    name: "About",
+    component: About,
+  },
+  {
+    path: "/contact",
+    name: "Contact",
+    component: Contact,
+  },
+];
 `
 
 export const transformAppFile = (root: j.Collection) => {
@@ -91,7 +87,6 @@ export const transformAppFile = (root: j.Collection) => {
 
   // Add the constants and functions
   const appExport = root.find(j.ExportDefaultDeclaration);
-  appExport.insertBefore(CONSTANTS);
   appExport.insertBefore(FUNCTIONS);
 
   // Add the Router component

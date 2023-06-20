@@ -24,7 +24,7 @@ export default function App() {
 //
 
 const expected = j(`\
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 const pages = [
   {
@@ -75,7 +75,7 @@ export default function App() {
     <div>
       <h1>Hello world</h1>
       {/* Router component */}
-      <Router>
+      <BrowserRouter>
         <Navbar />
         <Routes>
           {pages.map((page, index) => (
@@ -86,7 +86,7 @@ export default function App() {
             />
           ))}
         </Routes>
-      </Router>
+      </BrowserRouter>
     </div>
   );
 }\
