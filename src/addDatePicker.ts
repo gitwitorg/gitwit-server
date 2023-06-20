@@ -1,5 +1,5 @@
 import j from 'jscodeshift'
-import { applyTransform } from './utils'
+import { applyTransform, addDependency } from './utils'
 import { FileList } from "./types"
 
 const IMPORTS = `
@@ -53,8 +53,12 @@ export const transformAppFile = (root: j.Collection) => {
 };
 
 export default (files: FileList) => {
+  let transformedFiles: FileList = {};
   if (files["/App.js"]) {
-    return { "/App.js": applyTransform(files["/App.js"], transformAppFile) }
+    transformedFiles["/App.js"] = applyTransform(files["/App.js"], transformAppFile);
   }
-  return {}
+  if (files["/package.json"]) {
+    transformedFiles["/package.json"] = addDependency(files["/package.json"], "react-datepicker", "*")
+  }
+  return transformedFiles;
 }
