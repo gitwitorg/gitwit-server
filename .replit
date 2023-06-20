@@ -1,4 +1,4 @@
-run = "npm run test"
+run = "npm run dev"
 hidden = [".build", ".config"]
 
 [packager]
