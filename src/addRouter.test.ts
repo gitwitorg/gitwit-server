@@ -25,24 +25,7 @@ export default function App() {
 
 const expected = j(`\
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-
-const pages = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    component: About
-  },
-  {
-    path: '/contact',
-    name: 'Contact',
-    component: Contact
-  }
-];
+import { pages } from "./pages";
 
 function Navbar() {
   return (
@@ -56,18 +39,6 @@ function Navbar() {
       </ul>
     </nav>
   );
-}
-
-function Home() {
-  return <h2>Home</h2>;
-}
-
-function About() {
-  return <h2>About</h2>;
-}
-
-function Contact() {
-  return <h2>Contact</h2>;
 }
 
 export default function App() {
