@@ -2,15 +2,21 @@ import j from 'jscodeshift'
 import { applyTransform, addDependency, addImports, addHooks, addComponent } from './utils'
 import { FileList } from "./types"
 
+const ENV = `\
+REACT_APP_FIREBASE_API_KEY=<YOUR_API_KEY>
+REACT_APP_FIREBASE_AUTH_DOMAIN=<YOUR_AUTH_DOMAIN>
+REACT_APP_FIREBASE_PROJECT_ID=<YOUR_PROJECT_ID>
+`;
+
 const FIREBASE = `\
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: '<YOUR_API_KEY>',
-  authDomain: '<YOUR_AUTH_DOMAIN>',
-  projectId: '<YOUR_PROJECT_ID>',
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
 };
 
 // Initialize Firebase
@@ -101,6 +107,7 @@ export const transformAppFile = (root: j.Collection) => {
 
 export default (files: FileList) => {
   let transformedFiles: FileList = {};
+  transformedFiles["/.env"] = files["/.env"] ? files["/.env"] + "\n" + ENV : ENV;
   if (files["/App.js"]) {
     transformedFiles["/App.js"] = applyTransform(files["/App.js"], transformAppFile);
   }
