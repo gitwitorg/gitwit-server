@@ -4,6 +4,7 @@ import { FileList } from "./types"
 
 const IMPORTS = `
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink, navigationMenuTriggerStyle } from "@teovilla/shadcn-ui-react";
 import { pages } from './pages';
 `
 
@@ -26,15 +27,19 @@ const COMPONENT = `
 const FUNCTIONS = `
 function Navbar() {
   return (
-    <nav>
-      <ul>
-        {pages.map((page, index) => (
-          <li key={index}>
-            <Link to={page.path}>{page.name}</Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
+  <NavigationMenu>
+    <NavigationMenuList>
+    {pages.map((page, index) => (
+      <NavigationMenuItem key={index}>
+        <Link to={page.path}>
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            {page.name}
+          </NavigationMenuLink>
+        </Link>
+      </NavigationMenuItem>
+    ))}
+    </NavigationMenuList>
+  </NavigationMenu>
   );
 }
 `;
@@ -102,6 +107,7 @@ export default (files: FileList) => {
   }
   if (files["/package.json"]) {
     transformedFiles["/package.json"] = addDependency(files["/package.json"], "react-router-dom", "*")
+    transformedFiles["/package.json"] = addDependency(transformedFiles["/package.json"], "@teovilla/shadcn-ui-react", "*")
   }
   transformedFiles["/pages/Home.js"] = formatCode(HOME);
   transformedFiles["/pages/About.js"] = formatCode(ABOUT);
