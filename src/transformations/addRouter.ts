@@ -1,6 +1,6 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency, addImports, addComponent, formatCode } from './utils'
-import { FileList } from "./types"
+import { applyTransform, addDependency, addImports, addComponent, formatCode } from '../utils'
+import { FileList } from "../types"
 
 const IMPORTS = `
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';

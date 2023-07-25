@@ -1,6 +1,6 @@
 import j from 'jscodeshift'
 import { transformAppFile } from "./addRouter";
-import { toString } from "./utils";
+import { toString } from "../utils";
 
 //
 // The transformation

@@ -1,6 +1,6 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency, addImports, addComponent } from './utils'
-import { FileList } from "./types"
+import { applyTransform, addDependency, addImports, addComponent } from '../utils'
+import { FileList } from "../types"
 
 const IMPORTS = `import { Label } from "@teovilla/shadcn-ui-react"
 import { RadioGroup, RadioGroupItem } from "@teovilla/shadcn-ui-react"`

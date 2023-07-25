@@ -1,6 +1,6 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency, addImports, addHooks, addComponent } from './utils'
-import { FileList } from "./types"
+import { applyTransform, addDependency, addImports, addHooks, addComponent } from '../utils'
+import { FileList } from "../types"
 
 const USE_FORM = `\
 import { useState } from 'react';

@@ -1,6 +1,6 @@
 import j from 'jscodeshift'
-import { applyTransform, addDependency, addImports, addHooks, addComponent } from './utils'
-import { FileList } from "./types"
+import { applyTransform, addDependency, addImports, addHooks, addComponent } from '../utils'
+import { FileList } from "../types"
 
 const IMPORTS = `import { useState } from "react";
 import DatePicker from "react-datepicker";
