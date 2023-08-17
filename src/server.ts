@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { transformations, transformFiles } from './transform'
 import cors from 'cors'
+import OpenAI from 'openai';
 
 // Create an Express application
 const app = express();
@@ -33,6 +34,34 @@ app.get("/transformations", async (req: Request, res: Response) => {
         console.error("Error:", error);
         res.status(500).json({ error: error.message });
     }
+});
+
+const openai = new OpenAI({});
+
+app.post('/generate', async (req, res) => {
+    const stream = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: 'Write a fibonacci generator in JS. Enclose the code in triple backticks.' }],
+        stream: true
+    });
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    var generatedCode = '';
+    for await (const part of stream) {
+        const message = part.choices[0]?.delta?.content;
+        generatedCode += message;
+
+        if (message !== undefined) {
+            const fences = generatedCode.split('```').length-1;
+            const codeBlockStarted = fences % 2 === 1;
+            if (codeBlockStarted) {
+                res.write(message);
+            }
+            if (fences >= 2) {
+                break;
+            }
+        }
+    }
+    res.end();
 });
 
 // Start the server
