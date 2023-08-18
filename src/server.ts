@@ -38,10 +38,12 @@ app.get("/transformations", async (req: Request, res: Response) => {
 
 const openai = new OpenAI({});
 
-app.post('/generate', async (req, res) => {
+app.post('/generate', async (req: Request, res: Response) => {
+    const instruction = "Take the above code and\n" + req.body.command + "\nReturn the complete code with the changes.";
+    const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
     const stream = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: 'Write a fibonacci generator in JS. Enclose the code in triple backticks.' }],
+        messages: [{ role: 'user', content: prompt }],
         stream: true
     });
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
