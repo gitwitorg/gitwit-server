@@ -3,6 +3,9 @@ import { transformations, transformFiles } from './transform'
 import cors from 'cors'
 import OpenAI from 'openai';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 // Create an Express application
 const app = express();
 const port = 3001;
@@ -36,7 +39,15 @@ app.get("/transformations", async (req: Request, res: Response) => {
     }
 });
 
-const openai = new OpenAI({});
+const openai = new OpenAI(
+    process.env.HELICONE_API_KEY ? {
+        baseURL: 'https://oai.hconeai.com/v1',
+        defaultHeaders: {
+            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        },
+        apiKey: process.env.OPENAI_API_KEY
+    } : {}
+);
 
 app.post('/generate', async (req: Request, res: Response) => {
     const instruction = "Take the above code and\n" + req.body.command + "\nReturn the complete code with the changes.";
