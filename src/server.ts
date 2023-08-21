@@ -43,7 +43,7 @@ const openai = new OpenAI(
     process.env.HELICONE_API_KEY ? {
         baseURL: 'https://oai.hconeai.com/v1',
         defaultHeaders: {
-            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
         },
         apiKey: process.env.OPENAI_API_KEY
     } : {}
@@ -60,7 +60,15 @@ app.post('/generate', async (req: Request, res: Response) => {
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
         stream: true,
-        user: "cookie:"+req.body.userId,
+        user: "cookie:"+req.body.userId
+    }, {
+        headers: {
+          // The rate limit is 100/IP address/minute
+          "Helicone-Property-IP": req.ip,
+          "Helicone-Property-Action": "Transform",
+          "Helicone-Property-Instruction": req.body.command,
+          "Helicone-RateLimit-Policy": "100;w=60;s=ip"
+        }
     });
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     var generatedCode = '';
