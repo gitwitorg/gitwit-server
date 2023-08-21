@@ -50,12 +50,17 @@ const openai = new OpenAI(
 );
 
 app.post('/generate', async (req: Request, res: Response) => {
+    if (req.body.userId === undefined) {
+        res.status(400).json({ error: "userId is required" });
+        return;
+    }
     const instruction = "Take the above code and\n" + req.body.command + "\nReturn the complete code with the changes.";
     const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
     const stream = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
-        stream: true
+        stream: true,
+        user: "cookie:"+req.body.userId,
     });
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     var generatedCode = '';
