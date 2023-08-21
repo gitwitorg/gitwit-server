@@ -64,14 +64,7 @@ app.post('/generate', async (req: Request, res: Response) => {
         generatedCode += message;
 
         if (message !== undefined) {
-            const fences = generatedCode.split('```').length-1;
-            const codeBlockStarted = fences % 2 === 1;
-            if (codeBlockStarted) {
-                res.write(message);
-            }
-            if (fences >= 2) {
-                break;
-            }
+            res.write(message);
         }
     }
     res.end();
