@@ -66,7 +66,7 @@ app.post('/generate', async (req: Request, res: Response) => {
           // The rate limit is 100/IP address/minute
           "Helicone-Property-IP": req.ip,
           "Helicone-Property-Action": "Transform",
-          "Helicone-Property-Instruction": req.body.command,
+          "Helicone-Property-Instruction": encodeURIComponent(req.body.command),
           "Helicone-RateLimit-Policy": "100;w=60;s=ip"
         }
     });
