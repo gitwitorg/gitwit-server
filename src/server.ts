@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Application, Request, Response } from 'express';
 import { transformations, transformFiles } from './transform'
 import cors from 'cors'
 import OpenAI from 'openai';
@@ -6,12 +6,21 @@ import OpenAI from 'openai';
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { ClerkExpressWithAuth, WithAuthProp, LooseAuthProp } from "@clerk/clerk-sdk-node";
+
 // Create an Express application
-const app = express();
+const app: Application = express();
+
+declare global {
+  namespace Express {
+    interface Request extends LooseAuthProp {}
+  }
+}
 const port = 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use(ClerkExpressWithAuth());
 
 // Define a route handler for the root path
 app.get('/', (req: Request, res: Response) => {
@@ -49,18 +58,19 @@ const openai = new OpenAI(
     } : {}
 );
 
-app.post('/generate', async (req: Request, res: Response) => {
-    if (req.body.userId === undefined) {
+app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
+    if ((req.auth.userId || req.body.userId) == undefined) {
         res.status(400).json({ error: "userId is required" });
         return;
     }
+    const userId = req.auth.userId ? req.auth.userId : `cookie:${req.body.userId}`;
     const instruction = "Take the above code and\n" + req.body.command + "\nReturn the complete code with the changes.";
     const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
     const stream = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
         stream: true,
-        user: "cookie:"+req.body.userId
+        user: userId
     }, {
         headers: {
           // The rate limit is 100/IP address/minute
