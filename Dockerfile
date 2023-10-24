@@ -4,17 +4,11 @@ FROM node:18.16.1
 # Set the working directory in the container to /app
 WORKDIR /app
 
-# Copy package.json and yarn.lock to the container
-COPY package.json yarn.lock /app/
+# Copy application to the container
+COPY package.json yarn.lock src tsconfig.json /app/
 
 # Install project dependencies
 RUN yarn install
-
-# Copy the rest of the application code to the container
-COPY src tsconfig.json /app/
-
-# Compile TypeScript code
-RUN yarn build
 
 # Expose the port on which your ExpressJS server will run (replace 3000 with the actual port)
 EXPOSE 3001

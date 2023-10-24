@@ -25,8 +25,6 @@ To use, first install dependencies:
 
 To run in production mode:
 
-`yarn build`
-
 `yarn start`
 
 To run in development mode:
