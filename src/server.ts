@@ -26,6 +26,7 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, World!');
 });
 
+// Create an OpenAI client
 const openai = new OpenAI(
     process.env.HELICONE_API_KEY ? {
         baseURL: 'https://oai.hconeai.com/v1',
@@ -36,12 +37,17 @@ const openai = new OpenAI(
     } : {}
 );
 
+// Define a route handler for the API endpoint
 app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
     if ((req.auth.userId || req.body.userId) == undefined) {
         res.status(400).json({ error: "userId is required" });
         return;
     }
+
+    // If the user is logged in, use their Clerk ID, otherwise use a cookie
     const userId = req.auth.userId ? req.auth.userId : `cookie:${req.body.userId}`;
+
+    // Make a streaming request to the OpenAI API
     const instruction = "Take the above code and\n" + req.body.command + "\nReturn the complete code with the changes.";
     const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
     const stream = await openai.chat.completions.create({
@@ -58,6 +64,8 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
           "Helicone-RateLimit-Policy": "100;w=60;s=ip"
         }
     });
+
+    // Stream the response back to the client
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     for await (const part of stream) {
         const message = part.choices[0]?.delta?.content;
