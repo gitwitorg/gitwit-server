@@ -32,3 +32,11 @@ To run in production mode:
 To run in development mode:
 
 `yarn dev`
+
+## Docker
+
+To run with Docker:
+
+`docker build -t gitwit-server .`
+
+`docker run -d -p 3001:3001 --env-file .env gitwit-server`
