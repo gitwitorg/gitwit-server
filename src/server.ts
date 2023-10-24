@@ -81,11 +81,8 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
         }
     });
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    var generatedCode = '';
     for await (const part of stream) {
         const message = part.choices[0]?.delta?.content;
-        generatedCode += message;
-
         if (message !== undefined) {
             res.write(message);
         }
