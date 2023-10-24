@@ -1,5 +1,4 @@
 import express, { Application, Request, Response } from 'express';
-import { transformations, transformFiles } from './transform'
 import cors from 'cors'
 import OpenAI from 'openai';
 
@@ -25,27 +24,6 @@ app.use(ClerkExpressWithAuth());
 // Define a route handler for the root path
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello, World!');
-});
-
-// Define an API endpoint for code transformation
-app.post("/transform", async (req: Request, res: Response) => {
-    try {
-        const modifiedCode = await transformFiles(req.body.files, req.body.transformation, req.body.activeFile);
-        res.json(modifiedCode);
-    } catch (error: any) {
-        console.error("Error:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Define an API endpoint to list available transformations
-app.get("/transformations", async (req: Request, res: Response) => {
-    try {
-        res.json(transformations);
-    } catch (error: any) {
-        console.error("Error:", error);
-        res.status(500).json({ error: error.message });
-    }
 });
 
 const openai = new OpenAI(
