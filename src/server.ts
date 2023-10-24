@@ -47,31 +47,37 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
     // If the user is logged in, use their Clerk ID, otherwise use a cookie
     const userId = req.auth.userId ? req.auth.userId : `cookie:${req.body.userId}`;
 
-    // Make a streaming request to the OpenAI API
-    const instruction = "Take the above code and\n" + req.body.command + "\nReturn the complete code with the changes.";
-    const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
-    const stream = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        stream: true,
-        user: userId
-    }, {
-        headers: {
-          // The rate limit is 100/IP address/minute
-          "Helicone-Property-IP": req.ip,
-          "Helicone-Property-Action": "Transform",
-          "Helicone-Property-Instruction": encodeURIComponent(req.body.command),
-          "Helicone-RateLimit-Policy": "100;w=60;s=ip"
-        }
-    });
+    try {
+        // Make a streaming request to the OpenAI API
+        const instruction = "Take the above code and\n" + req.body.command + "\nReturn the complete code with the changes.";
+        const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
+        const stream = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: prompt }],
+            stream: true,
+            user: userId
+        }, {
+            headers: {
+                // The rate limit is 100/IP address/minute
+                "Helicone-Property-IP": req.ip,
+                "Helicone-Property-Action": "Transform",
+                "Helicone-Property-Instruction": encodeURIComponent(req.body.command),
+                "Helicone-RateLimit-Policy": "100;w=60;s=ip"
+            }
+        });
 
-    // Stream the response back to the client
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    for await (const part of stream) {
-        const message = part.choices[0]?.delta?.content;
-        if (message !== undefined) {
-            res.write(message);
+        // Stream the response back to the client
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        for await (const part of stream) {
+            const message = part.choices[0]?.delta?.content;
+            if (message !== undefined) {
+                res.write(message);
+            }
         }
+    } catch (e: any) {
+        // If an error occurs, log it and return a 500
+        console.log(e);
+        res.status(500).json({ error: e.message });
     }
     res.end();
 });
