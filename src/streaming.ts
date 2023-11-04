@@ -57,7 +57,10 @@ export class CodeStream {
 
         // Push the chunk to the client.
         if (outChunk) {
-            this.res.write(outChunk);
+            this.res.write(JSON.stringify({
+                "type": "text",
+                "content": outChunk
+            }) + "\n");
         }
 
         this.streamedText = this.streamedText + inChunk;
