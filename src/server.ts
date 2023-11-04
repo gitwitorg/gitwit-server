@@ -2,6 +2,8 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors'
 import OpenAI from 'openai';
 
+import { CodeStream } from './streaming';
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -68,12 +70,9 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
 
         // Stream the response back to the client
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-        for await (const part of stream) {
-            const message = part.choices[0]?.delta?.content;
-            if (message !== undefined) {
-                res.write(message);
-            }
-        }
+        const codeStream = new CodeStream(res);
+        await codeStream.pushStream(stream);
+
     } catch (e: any) {
         // If an error occurs, log it and return a 500
         console.log(e);
