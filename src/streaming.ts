@@ -37,7 +37,12 @@ export class CodeStream {
         this.noCodeFence = false;
         this.versionRequests = new Queue();
         this.versionResults = {};
-        this.versionResultStatuses = {};
+        // Ignore these three because they are already included in the template.
+        this.versionResultStatuses = {
+            "react" : "loading",
+            "react-dom": "loading",
+            "react-scripts": "loading"
+        };
         this.res = res;
     }
 
