@@ -1,15 +1,20 @@
-import { countOccurrences, getIndices } from './utils/regex';
-import { detectImportStatements } from './utils/codegen';
-
 import { Response } from 'express';
 import { Stream } from 'openai/streaming';
 import { OpenAI } from 'openai'
+
+import { countOccurrences, getIndices } from './utils/regex';
+import { detectImportStatements } from './utils/codegen';
+import Queue from './utils/queue';
+import { mostRecentVersion } from './utils/npm';
 
 // Define a regular expression to detect code fences.
 const fencePattern = /\n?```.*\n/;
 
 // Define a regular expression to detect unfinished code fences.
 const partialFencePattern = /\n(`(`(`[^\n]*)?)?)?$/;
+
+// Use the knowledge cutoff date to find compatible dependencies.
+const timeMachineDate = new Date('2021-09-01');
 
 export class CodeStream {
 
@@ -19,13 +24,34 @@ export class CodeStream {
     buffer: string;         // Text waiting to be pushed to the response.
     noCodeFence: boolean;   // Whether the response is using code fences.
 
+    versionRequests: Queue; // A queue of requests to the npm registry.
+    versionResults: {[key: string]: string}; // A map of package names to their latest versions.
+
     constructor(res: Response) {
         this.buffer = '';
         this.streamedText = '';
         this.streamedCode = '';
         this.noCodeFence = false;
+        this.versionRequests = new Queue();
+        this.versionResults = {};
         this.res = res;
     }
+
+    private async fetchVersion(packageName: string) {
+        // Ensure that we only make one request per package.
+        if (this.versionResults.hasOwnProperty(packageName)) return;
+        this.versionResults[packageName] = '';
+
+        // Add the version request to the queue.
+        this.versionRequests.addTask(async () => {
+            try {
+                this.versionResults[packageName] = await mostRecentVersion(packageName, timeMachineDate);
+            } catch (error) {
+                console.error('Error fetching version for', packageName, error);
+                this.versionResults[packageName] = '*';
+            }    
+        });
+    };
 
     // Push a chunk of text to the client.
     // This requires closing fences to be complete, but unfinished opening fences are OK.
@@ -70,13 +96,8 @@ export class CodeStream {
                     this.streamedCode.slice(previousNewline)
                     + inChunk.slice(0, currentNewline)
                 );
-                // Push the dependencies to the client.
-                if (dependencies.length) {
-                    this.res.write(JSON.stringify({
-                        "type": "dependencies",
-                        "content": dependencies
-                    }) + "\n");
-                }
+                // Fetch version numbers for all new dependencies.
+                dependencies.forEach(dependency => this.fetchVersion(dependency));
             }
 
             // Push the chunk to the client.
@@ -109,5 +130,14 @@ export class CodeStream {
         // If there is an unfinished code fence, push the buffer.
         // Add a newline to ensure that closing fences are recognized.
         this.pushChunk(this.buffer + (this.noCodeFence ? "" : "\n"));
+
+        // Send the final list of dependencies and version numbers to the client.
+        await this.versionRequests.waitUntilFinished();
+        if (Object.keys(this.versionResults).length) {
+            this.res.write(JSON.stringify({
+                "type": "dependencies",
+                "content": this.versionResults
+            }) + "\n");
+        }
     }
 }
