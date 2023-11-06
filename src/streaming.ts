@@ -1,4 +1,6 @@
 import { countOccurrences, getIndices } from './utils/regex';
+import { detectImportStatements } from './utils/codegen';
+
 import { Response } from 'express';
 import { Stream } from 'openai/streaming';
 import { OpenAI } from 'openai'
@@ -13,12 +15,14 @@ export class CodeStream {
 
     res: Response;          // The Express response object.
     streamedText: string;   // All text received from the OpenAI API.
+    streamedCode: string;   // All text sent to the client.
     buffer: string;         // Text waiting to be pushed to the response.
     noCodeFence: boolean;   // Whether the response is using code fences.
 
     constructor(res: Response) {
         this.buffer = '';
         this.streamedText = '';
+        this.streamedCode = '';
         this.noCodeFence = false;
         this.res = res;
     }
@@ -61,6 +65,7 @@ export class CodeStream {
                 "type": "text",
                 "content": outChunk
             }) + "\n");
+            this.streamedCode = this.streamedCode + outChunk;
         }
 
         this.streamedText = this.streamedText + inChunk;
@@ -85,5 +90,13 @@ export class CodeStream {
         // If there is an unfinished code fence, push the buffer.
         // Add a newline to ensure that closing fences are recognized.
         this.pushChunk(this.buffer + (this.noCodeFence ? "" : "\n"));
+
+        const dependencies = detectImportStatements(this.streamedCode);
+        if (dependencies.length) {
+            this.res.write(JSON.stringify({
+                "type": "dependencies",
+                "content": dependencies
+            }) + "\n");
+        }
     }
 }
