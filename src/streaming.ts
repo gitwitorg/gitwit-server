@@ -84,6 +84,6 @@ export class CodeStream {
 
         // If there is an unfinished code fence, push the buffer.
         // Add a newline to ensure that closing fences are recognized.
-        this.pushChunk(this.buffer + "\n");
+        this.pushChunk(this.buffer + (this.noCodeFence ? "" : "\n"));
     }
 }
