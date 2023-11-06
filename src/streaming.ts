@@ -16,6 +16,8 @@ const partialFencePattern = /\n(`(`(`[^\n]*)?)?)?$/;
 // Use the knowledge cutoff date to find compatible dependencies.
 const timeMachineDate = new Date('2021-09-01');
 
+type VersionResultStatus = "loading" | "ready" | "sent";
+
 export class CodeStream {
 
     res: Response;          // The Express response object.
@@ -25,7 +27,8 @@ export class CodeStream {
     noCodeFence: boolean;   // Whether the response is using code fences.
 
     versionRequests: Queue; // A queue of requests to the npm registry.
-    versionResults: {[key: string]: string}; // A map of package names to their latest versions.
+    versionResults: { [key: string]: string }; // A map of package names to their latest versions.
+    versionResultStatuses: { [key: string]: VersionResultStatus }; // A map of package names to their latest versions.
 
     constructor(res: Response) {
         this.buffer = '';
@@ -34,13 +37,14 @@ export class CodeStream {
         this.noCodeFence = false;
         this.versionRequests = new Queue();
         this.versionResults = {};
+        this.versionResultStatuses = {};
         this.res = res;
     }
 
     private async fetchVersion(packageName: string) {
         // Ensure that we only make one request per package.
-        if (this.versionResults.hasOwnProperty(packageName)) return;
-        this.versionResults[packageName] = '';
+        if (this.versionResultStatuses.hasOwnProperty(packageName)) return;
+        this.versionResultStatuses[packageName] = "loading";
 
         // Add the version request to the queue.
         this.versionRequests.addTask(async () => {
@@ -49,9 +53,29 @@ export class CodeStream {
             } catch (error) {
                 console.error('Error fetching version for', packageName, error);
                 this.versionResults[packageName] = '*';
-            }    
+            }
+            this.versionResultStatuses[packageName] = "ready";
         });
     };
+
+    // Push a list of dependencies to the client.
+    private pushDependencies() {
+        // Find all dependencies that are ready to be sent.
+        const versionsToSend: { [key: string]: string } = {};
+        for (const packageName in this.versionResultStatuses) {
+            if (this.versionResultStatuses[packageName] === "ready") {
+                this.versionResultStatuses[packageName] = "sent";
+                versionsToSend[packageName] = this.versionResults[packageName];
+            }
+        }
+        // Send the list of dependencies to the client.
+        if (Object.keys(versionsToSend).length) {
+            this.res.write(JSON.stringify({
+                "type": "dependencies",
+                "content": versionsToSend
+            }) + "\n");
+        }
+    }
 
     // Push a chunk of text to the client.
     // This requires closing fences to be complete, but unfinished opening fences are OK.
@@ -106,6 +130,9 @@ export class CodeStream {
                 "content": outChunk
             }) + "\n");
             this.streamedCode = this.streamedCode + outChunk;
+
+            // Push any new dependencies to the client.
+            this.pushDependencies();
         }
 
         this.streamedText = this.streamedText + inChunk;
@@ -131,13 +158,8 @@ export class CodeStream {
         // Add a newline to ensure that closing fences are recognized.
         this.pushChunk(this.buffer + (this.noCodeFence ? "" : "\n"));
 
-        // Send the final list of dependencies and version numbers to the client.
+        // Send the remaining list of dependencies to the client.
         await this.versionRequests.waitUntilFinished();
-        if (Object.keys(this.versionResults).length) {
-            this.res.write(JSON.stringify({
-                "type": "dependencies",
-                "content": this.versionResults
-            }) + "\n");
-        }
+        this.pushDependencies();
     }
 }
