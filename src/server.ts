@@ -51,7 +51,7 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
 
     try {
         // Make a streaming request to the OpenAI API
-        const instruction = "Take the above code and\n" + req.body.command + "\nReturn the complete code with the changes.";
+        const instruction = "Take the above code and modify it to\n" + req.body.command + "\nReturn the complete code with the changes.";
         const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
         const stream = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
