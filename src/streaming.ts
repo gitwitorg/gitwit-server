@@ -47,6 +47,13 @@ export class CodeStream {
     }
 
     private async fetchVersion(packageName: string) {
+        // Use a newer version of react-router-dom to fix page links.
+        if (packageName === "react-router-dom") {
+            this.versionResults[packageName] = "5.3.4";
+            this.versionResultStatuses[packageName] = "ready";
+            return;
+        }
+
         // Ensure that we only make one request per package.
         if (this.versionResultStatuses.hasOwnProperty(packageName)) return;
         this.versionResultStatuses[packageName] = "loading";
