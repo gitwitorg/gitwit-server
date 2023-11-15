@@ -18,9 +18,9 @@ const timeMachineDate = new Date('2021-09-01');
 
 type VersionResultStatus = "loading" | "ready" | "sent";
 
-const packageVersions: Record<string, string> = {
-    "react-router-dom": "5.3.4",
-    "react-chartjs-2": "3.2.0"
+const packageVersions: Record<string, Record<string, string>> = {
+    "react-router-dom": { "react-router-dom": "5.3.4" },
+    "react-chartjs-2": { "react-chartjs-2": "3.2.0", "chart.js": "3.5.1" }
 };
 
 export class CodeStream {
@@ -55,8 +55,10 @@ export class CodeStream {
 
     private async fetchVersion(packageName: string) {
         if (packageVersions.hasOwnProperty(packageName)) {
-            this.versionResults[packageName] = packageVersions[packageName];
-            this.versionResultStatuses[packageName] = "ready";
+            for (const [dependencyName, version] of Object.entries(packageVersions[packageName])) {
+                this.versionResults[dependencyName] = version;
+                this.versionResultStatuses[dependencyName] = "ready";
+            }
             return;
         }
 
