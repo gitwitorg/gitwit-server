@@ -26,6 +26,7 @@ export class CodeStream {
     buffer: string;         // Text waiting to be pushed to the response.
     noCodeFence: boolean;   // Whether the response is using code fences.
 
+    peerDependencies: Set<string>;
     versionRequests: Queue; // A queue of requests to the npm registry.
     versionResults: { [key: string]: string }; // A map of package names to their latest versions.
     versionResultStatuses: { [key: string]: VersionResultStatus }; // A map of package names to their latest versions.
@@ -61,7 +62,12 @@ export class CodeStream {
         // Add the version request to the queue.
         this.versionRequests.addTask(async () => {
             try {
-                this.versionResults[packageName] = await mostRecentVersion(packageName, timeMachineDate);
+                const version = await mostRecentVersion(packageName, timeMachineDate);
+                this.versionResults[packageName] = version.version;
+                // Add all peer dependencies to the list of dependencies.
+                for (const key in version.peerDependencies) {
+                    this.peerDependencies.add(key);
+                }
             } catch (error) {
                 console.error('Error fetching version for', packageName, error);
                 this.versionResults[packageName] = '*';
@@ -169,6 +175,9 @@ export class CodeStream {
         // If there is an unfinished code fence, push the buffer.
         // Add a newline to ensure that closing fences are recognized.
         this.pushChunk(this.buffer + (this.noCodeFence ? "" : "\n"));
+
+        // Fetch version numbers for all peer dependencies.
+        this.peerDependencies.forEach(dependency => this.fetchVersion(dependency));
 
         // Send the remaining list of dependencies to the client.
         await this.versionRequests.waitUntilFinished();
