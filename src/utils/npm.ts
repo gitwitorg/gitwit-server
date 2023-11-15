@@ -22,10 +22,11 @@ export const mostRecentVersion = async (packageName: string, beforeDate: Date) =
         return new Date(times[version]) <= beforeDate;
     });
 
-    // Find the most recent version before the given date.
-    return versionsBeforeDate.length > 0
+    // Return the most recent version before the given date.
+    // If there is none, return the earliest version.
+    const versionNumber = versionsBeforeDate.length > 0
         ? versionsBeforeDate[versionsBeforeDate.length - 1]
-        : '*';
+        : versions[0];
 
     return responseData.versions[versionNumber];
 };
