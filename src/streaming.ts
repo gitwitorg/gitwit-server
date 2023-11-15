@@ -18,6 +18,11 @@ const timeMachineDate = new Date('2021-09-01');
 
 type VersionResultStatus = "loading" | "ready" | "sent";
 
+const packageVersions: Record<string, string> = {
+    "react-router-dom": "5.3.4",
+    "react-chartjs-2": "3.2.0"
+};
+
 export class CodeStream {
 
     res: Response;          // The Express response object.
@@ -38,9 +43,10 @@ export class CodeStream {
         this.noCodeFence = false;
         this.versionRequests = new Queue();
         this.versionResults = {};
+        this.peerDependencies = new Set();
         // Ignore these three because they are already included in the template.
         this.versionResultStatuses = {
-            "react" : "loading",
+            "react": "loading",
             "react-dom": "loading",
             "react-scripts": "loading"
         };
@@ -48,9 +54,8 @@ export class CodeStream {
     }
 
     private async fetchVersion(packageName: string) {
-        // Use a newer version of react-router-dom to fix page links.
-        if (packageName === "react-router-dom") {
-            this.versionResults[packageName] = "5.3.4";
+        if (packageVersions.hasOwnProperty(packageName)) {
+            this.versionResults[packageName] = packageVersions[packageName];
             this.versionResultStatuses[packageName] = "ready";
             return;
         }
