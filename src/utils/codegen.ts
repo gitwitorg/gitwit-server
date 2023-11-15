@@ -1,6 +1,6 @@
 // Detect all packages imported in block of JavaScript code and return the package names.
 export const detectImportStatements = (content: string): string[] => {
-    const pattern = /^import\s+(?:.*?\s+from\s+)?['"]([^\/\.].*)['"];?$/gm;
+    const pattern = /^import\s+(?:.*?\s+from\s+)?['"]([^\/\.].*)['"];?\s*(?:\/\/.*)?$/gm;
     const matches = content.match(pattern);
   
     const extractPackageName = (packageName: string): string => {
