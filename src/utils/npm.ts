@@ -6,21 +6,26 @@ export const mostRecentVersion = async (packageName: string, beforeDate: Date) =
     if (!response.ok) {
         throw new Error('Network response was not ok.');
     }
-    const versions = (await response.json()).time;
+    const responseData = await response.json();
+    const times = responseData.time;
 
-    // Filter versions that are before the given date
-    const versionsBeforeDate = Object.keys(versions)
-        .filter(version => {
-            // Excludes versions like 'modified', 'created', etc. and prerelease versions
-            const semverRegex = /^(\d+\.)?(\d+\.)?(\*|\d+)$/;
-            return semverRegex.test(version) && new Date(versions[version]) <= beforeDate;
-        });
+    // Find the keys that are both in the time and versions objects.
+    const versions = Object.keys(times).filter(
+        (key: string) => Object.keys(responseData.versions).includes(key)
+    )
 
     // Sort the versions as they might not be chronologically sorted.
-    versionsBeforeDate.sort((a, b) => new Date(versions[a]).getTime() - new Date(versions[b]).getTime());
+    versions.sort((a, b) => new Date(times[a]).getTime() - new Date(times[b]).getTime());
+
+    // Filter versions that are before the given date
+    const versionsBeforeDate = versions.filter(version => {
+        return new Date(times[version]) <= beforeDate;
+    });
 
     // Find the most recent version before the given date.
     return versionsBeforeDate.length > 0
         ? versionsBeforeDate[versionsBeforeDate.length - 1]
         : '*';
+
+    return responseData.versions[versionNumber];
 };
