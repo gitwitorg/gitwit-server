@@ -30,6 +30,7 @@ export class CodeStream {
     streamedCode: string;   // All text sent to the client.
     buffer: string;         // Text waiting to be pushed to the response.
     noCodeFence: boolean;   // Whether the response is using code fences.
+    finished: boolean;      // Whether the last code fence was received.
 
     peerDependencies: Set<string>;
     versionRequests: Queue; // A queue of requests to the npm registry.
@@ -41,6 +42,7 @@ export class CodeStream {
         this.streamedText = '';
         this.streamedCode = '';
         this.noCodeFence = false;
+        this.finished = false;
         this.versionRequests = new Queue();
         this.versionResults = {};
         this.peerDependencies = new Set();
@@ -127,6 +129,7 @@ export class CodeStream {
                     // If the second fence is in this chunk, return everything before it.
                     const fences = getIndices(this.streamedText + inChunk, fencePattern);
                     outChunk = inChunk.slice(0, fences[1] - this.streamedText.length);
+                    this.finished = true;
                 } else {
                     // If we are past the first fence, but the second fence is not in this chunk, return the whole chunk.
                     outChunk = inChunk;
@@ -176,6 +179,11 @@ export class CodeStream {
             if (!partialFencePattern.test(this.buffer)) {
                 this.pushChunk(this.buffer);
                 this.buffer = '';
+            }
+
+            // If we have received the last code fence, stop streaming.
+            if (this.finished) {
+                break;
             }
         }
 
