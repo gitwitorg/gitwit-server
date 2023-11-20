@@ -153,10 +153,10 @@ export class CodeStream {
 
         if (outChunk) {
             // If a line has been completed, look for import statements.
-            const currentNewline = outChunk.indexOf('\n');
+            const currentNewline = outChunk.indexOf('\n\n');
             if (currentNewline >= 0) {
                 // Find the end of the last completed line.
-                const previousNewline = Math.max(this.streamedCode.lastIndexOf('\n'), 0)
+                const previousNewline = Math.max(this.streamedCode.lastIndexOf('\n\n'), 0)
                 // Check all new complete lines for import statements.
                 const dependencies = detectImportStatements(
                     this.streamedCode.slice(previousNewline)
