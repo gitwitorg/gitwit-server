@@ -14,13 +14,11 @@ const fencePattern = /\n?```.*\n/;
 const partialFencePattern = /\n(`(`(`[^\n]*)?)?)?$/;
 
 // Use the knowledge cutoff date to find compatible dependencies.
-const timeMachineDate = new Date('2021-09-01');
+const timeMachineDate = new Date('2023-04-01');
 
 type VersionResultStatus = "loading" | "ready" | "sent";
 
 const packageVersions: Record<string, Record<string, string>> = {
-    "react-router-dom": { "react-router-dom": "5.3.4" },
-    "react-chartjs-2": { "react-chartjs-2": "3.2.0", "chart.js": "3.5.1" }
 };
 
 export class CodeStream {
