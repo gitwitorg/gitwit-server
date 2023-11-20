@@ -28,16 +28,30 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, World!');
 });
 
-// Create an OpenAI client
+// Azure deployment details
+const azureDomain = "gitwit-production";
+const deployment = "gpt-35-turbo";
+const apiVersion = "2023-07-01-preview";
+
+// Components of the Azure OpenAI API request
+const defaultQuery = { "api-version": apiVersion };
+const headers = { "api-key": process.env.AZURE_API_KEY };
+
+// Create an Azure OpenAI client
 const openai = new OpenAI(
     process.env.HELICONE_API_KEY ? {
-        baseURL: 'https://oai.hconeai.com/v1',
+        baseURL: `https://oai.hconeai.com/openai/deployments/${deployment}`,
         defaultHeaders: {
-            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+            "Helicone-OpenAI-API-Base": `https://${azureDomain}.openai.azure.com`,
+            ...headers
         },
-        apiKey: process.env.OPENAI_API_KEY
-    } : {}
-);
+        defaultQuery
+    } : {
+        baseURL: `https://${azureDomain}.openai.azure.com/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
+        defaultHeaders: headers,
+        defaultQuery
+    });
 
 // Define a route handler for the API endpoint
 app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
