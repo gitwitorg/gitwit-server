@@ -50,9 +50,22 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
     const userId = req.auth.userId ? req.auth.userId : `cookie:${req.body.userId}`;
 
     try {
+        
+        // Create the prompt
+        const jsCode = "```javascript\n" + req.body.code + "\n```";
+        const instruction = "Take the above code and modify it to";
+        const stylePrompt = [
+            "Return the complete code with the changes.",
+            "Use composable programming patterns to reduce the amount of code where appropriate.",
+            "Do not include any setup or installation commands.",
+            "Do not include any explanatory comments.",
+            "Do not add references to other files in the project.",
+            "Include and use external libraries if convenient.",
+            "After each imported library, add a comment giving the most recent library version like `// packagename@version`."
+        ].join(" ");
+        const prompt = [jsCode, instruction, req.body.command, stylePrompt].join("\n");
+
         // Make a streaming request to the OpenAI API
-        const instruction = "Take the above code and modify it to\n" + req.body.command + "\nReturn the complete code with the changes.";
-        const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
         const stream = await openai.chat.completions.create({
             model: 'gpt-4-1106-preview',
             messages: [{ role: 'user', content: prompt }],
