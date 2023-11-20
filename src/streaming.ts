@@ -9,9 +9,10 @@ import { mostRecentVersion } from './utils/npm';
 
 // Define a regular expression to detect code fences.
 const fencePattern = /\n?```.*\n/;
+const fenceLanguage = /\n?```(.*)\n/;
 
 // Define a regular expression to detect unfinished code fences.
-const partialFencePattern = /\n(`(`(`[^\n]*)?)?)?$/;
+const partialFencePattern = /`(`(`[^\n]*)?)?$/;
 
 // Use the knowledge cutoff date to find compatible dependencies.
 const timeMachineDate = new Date('2023-04-01');
@@ -29,6 +30,8 @@ export class CodeStream {
     buffer: string;         // Text waiting to be pushed to the response.
     noCodeFence: boolean;   // Whether the response is using code fences.
     finished: boolean;      // Whether the last code fence was received.
+    inBashBlock: boolean;  // Whether the current code fence block is a Bash script.
+    inJSBlock: boolean;    // Whether the current code fence block is a JavaScript script.
 
     peerDependencies: Set<string>;
     versionRequests: Queue; // A queue of requests to the npm registry.
@@ -41,6 +44,8 @@ export class CodeStream {
         this.streamedCode = '';
         this.noCodeFence = false;
         this.finished = false;
+        this.inBashBlock = false;
+        this.inJSBlock = false;
         this.versionRequests = new Queue();
         this.versionResults = {};
         this.peerDependencies = new Set();
@@ -119,19 +124,30 @@ export class CodeStream {
             // If we started with no code fence, ignore future fences.
             outChunk = inChunk;
         } else {
-            if (!fencePattern.test(this.streamedText) && fencePattern.test(this.streamedText + inChunk)) {
+            if (!this.inBashBlock && !this.inJSBlock && fencePattern.test(inChunk)) {
                 // If the first fence is in this chunk, return everything after it.
-                outChunk = (this.streamedText + inChunk).split(fencePattern)[1];
-            } else if (countOccurrences(this.streamedText, fencePattern) === 1) {
-                if (countOccurrences(this.streamedText + inChunk, fencePattern) > 1) {
+                // Get the text from the fence pattern group
+                const match = (fenceLanguage.exec(inChunk) || [null])[1];
+                if (match == "bash") {
+                    this.inBashBlock = true;
+                } else {
+                    this.inJSBlock = true;
+                    outChunk = inChunk.split(fencePattern)[1];
+                }
+            } else if (this.inJSBlock) {
+                if (fencePattern.test(inChunk)) {
                     // If the second fence is in this chunk, return everything before it.
-                    const fences = getIndices(this.streamedText + inChunk, fencePattern);
-                    outChunk = inChunk.slice(0, fences[1] - this.streamedText.length);
+                    const fences = getIndices(inChunk, fencePattern);
+                    outChunk = inChunk.slice(0, fences[0]);
                     this.finished = true;
                 } else {
                     // If we are past the first fence, but the second fence is not in this chunk, return the whole chunk.
                     outChunk = inChunk;
                 }
+            } else if (this.inBashBlock) {
+                if (fencePattern.test(inChunk)) {
+                    this.inBashBlock = false;
+                } 
             }
         }
 
