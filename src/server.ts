@@ -63,11 +63,12 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
     // If the user is logged in, use their Clerk ID, otherwise use a cookie
     const userId = req.auth.userId ? req.auth.userId : `cookie:${req.body.userId}`;
 
+    // Make a streaming request to the OpenAI API
+    let stream;
     try {
-        // Make a streaming request to the OpenAI API
         const instruction = "Take the above code and modify it to\n" + req.body.command + "\nReturn the complete code with the changes.";
         const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
-        const stream = await openai.chat.completions.create({
+        stream = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [{ role: 'user', content: prompt }],
             stream: true,
@@ -81,16 +82,23 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
                 "Helicone-RateLimit-Policy": "100;w=60;s=ip"
             }
         });
-
-        // Stream the response back to the client
-        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-        const codeStream = new CodeStream(res);
-        await codeStream.pushStream(stream);
-
     } catch (e: any) {
-        // If an error occurs, log it and return a 500
-        console.log(e);
         res.status(500).json({ error: e.message });
+    }
+
+    // Stream the response back to the client
+    if (stream) {
+        try {
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+            const codeStream = new CodeStream(res);
+            await codeStream.pushStream(stream);
+        } catch (e: any) {
+            // If an error occurs after the stream has started:
+            res.write(JSON.stringify({
+                "type": "error",
+                "content": e.message
+            }) + "\n");
+        }
     }
     res.end();
 });
