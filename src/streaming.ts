@@ -180,9 +180,10 @@ export class CodeStream {
             if (message) this.buffer += message;
 
             // As long as there is not an unfinished code fence, parse and empty the buffer.
-            if (!partialFencePattern.test(this.buffer)) {
-                this.pushChunk(this.buffer);
-                this.buffer = '';
+            if (!partialFencePattern.test(this.buffer) && this.buffer.includes("\n")) {
+                const lastNewlineIndex = this.buffer.lastIndexOf('\n') + 1;
+                this.pushChunk(this.buffer.substring(0, lastNewlineIndex));
+                this.buffer = this.buffer.substring(lastNewlineIndex);
             }
 
             // If we have received the last code fence, stop streaming.
