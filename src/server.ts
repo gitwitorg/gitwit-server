@@ -38,8 +38,11 @@ const defaultQuery = { "api-version": apiVersion };
 const headers = { "api-key": process.env.AZURE_API_KEY };
 
 // Create an Azure OpenAI client
+// Here, MOCK_API is used for a testing with a local mock server
 const openai = new OpenAI(
-    process.env.HELICONE_API_KEY ? {
+    process.env.MOCK_API ? {
+        baseURL: process.env.MOCK_API
+    } : process.env.HELICONE_API_KEY ? {
         baseURL: `https://oai.hconeai.com/openai/deployments/${deployment}`,
         defaultHeaders: {
             "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
