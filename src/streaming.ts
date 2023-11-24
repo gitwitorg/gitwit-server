@@ -85,6 +85,10 @@ export class CodeStream {
         });
     };
 
+    writeChunk(data: any) {
+        this.res.write(JSON.stringify(data) + "\n");
+    }
+
     // Push a list of dependencies to the client.
     private pushDependencies() {
         // Find all dependencies that are ready to be sent.
@@ -97,10 +101,10 @@ export class CodeStream {
         }
         // Send the list of dependencies to the client.
         if (Object.keys(versionsToSend).length) {
-            this.res.write(JSON.stringify({
+            this.writeChunk({
                 "type": "dependencies",
                 "content": versionsToSend
-            }) + "\n");
+            });
         }
     }
 
@@ -153,10 +157,10 @@ export class CodeStream {
             }
 
             // Push the chunk to the client.
-            this.res.write(JSON.stringify({
+            this.writeChunk({
                 "type": "text",
                 "content": outChunk
-            }) + "\n");
+            });
             this.streamedCode = this.streamedCode + outChunk;
 
             // Push any new dependencies to the client.
