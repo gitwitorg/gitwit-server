@@ -73,12 +73,14 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
         const jsCode = "```javascript\n" + req.body.code + "\n```";
         const instruction = "Take the above code and modify it to";
         const stylePrompt = [
-            "Return the complete code with the changes.",
+            "Make minimal changes to the given code and return the complete code with the changes.",
             "Do not include any setup or installation commands.",
-            "Use ReactJS and Tailwind.",
-            "Use composable programming patterns to reduce the amount of code where appropriate.",
             "Do not add references to other files in the project.",
-            "Include and use external libraries if convenient.",
+            "Use ReactJS and Tailwind.",
+            "Do not add <svg>s.",
+            "If required, include and use external libraries.",
+            "If required, use composable programming patterns to reduce the amount of code.",
+            "Only if images are required for the given task, use placeholder URLs in the form of `https://via.placeholder.com/[WIDTH]x[HEIGHT]/[RRGGBB]/FFFFFF`.",
             "After each imported library, add a comment giving the most recent library version like `// packagename@version`."
         ].join(" ");
         const prompt = [jsCode, instruction, req.body.command, stylePrompt].join("\n");
