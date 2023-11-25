@@ -69,8 +69,19 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
     // Make a streaming request to the OpenAI API
     let stream;
     try {
-        const instruction = "Take the above code and modify it to\n" + req.body.command + "\nReturn the complete code with the changes.";
-        const prompt = "```javascript\n" + req.body.code + "\n```\n" + instruction;
+        // Create the prompt
+        const jsCode = "```javascript\n" + req.body.code + "\n```";
+        const instruction = "Take the above code and modify it to";
+        const stylePrompt = [
+            "Return the complete code with the changes.",
+            "Do not include any setup or installation commands.",
+            "Use ReactJS and Tailwind.",
+            "Use composable programming patterns to reduce the amount of code where appropriate.",
+            "Do not add references to other files in the project.",
+            "Include and use external libraries if convenient.",
+            "After each imported library, add a comment giving the most recent library version like `// packagename@version`."
+        ].join(" ");
+        const prompt = [jsCode, instruction, req.body.command, stylePrompt].join("\n");
         stream = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [{ role: 'user', content: prompt }],
