@@ -99,6 +99,7 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
             }
         });
     } catch (e: any) {
+        console.log("Error creating stream:", e.message);
         res.status(500).json({ error: e.message });
     }
 
@@ -110,6 +111,7 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
             await codeStream.pushStream(stream);
         } catch (e: any) {
             // If an error occurs after the stream has started:
+            console.log("Error streaming response:", e.message);
             res.write(JSON.stringify({
                 "type": "error",
                 "content": e.message
