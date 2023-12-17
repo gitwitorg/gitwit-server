@@ -137,6 +137,7 @@ export class CodeStream {
         this.pushChunk(this.buffer + (this.noCodeFence ? "" : "\n"));
 
         // Fetch version numbers for all peer dependencies.
+        await this.dependencyIndex.versionRequests.waitUntilFinished();
         this.dependencyIndex.peerDependencies.forEach(dependency => this.dependencyIndex.fetchVersion(dependency));
 
         // Send the remaining list of dependencies to the client.
