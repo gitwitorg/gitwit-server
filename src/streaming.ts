@@ -4,26 +4,13 @@ import { OpenAI } from 'openai'
 
 import { countOccurrences, getIndices } from './utils/regex';
 import { detectImportStatements } from './utils/codegen';
-import Queue from './utils/queue';
-import { mostRecentVersion } from './utils/npm';
+import { DependencyIndex } from './utils/dependencies';
 
 // Define a regular expression to detect code fences.
 const fencePattern = /\n?```.*\n/;
 
 // Define a regular expression to detect unfinished code fences.
 const partialFencePattern = /\n(`(`(`[^\n]*)?)?)?$/;
-
-// Use the knowledge cutoff date to find compatible dependencies.
-const timeMachineDate = new Date('2021-09-01');
-
-type VersionResultStatus = "loading" | "ready" | "sent";
-
-const packageVersions: Record<string, Record<string, string>> = {
-    "react-router-dom": { "react-router-dom": "5.3.4" },
-    "react-chartjs-2": { "react-chartjs-2": "3.2.0", "chart.js": "3.5.1" },
-    "react-webcam": { "react-webcam": "7.2.0" }
-};
-
 export class CodeStream {
 
     res: Response;          // The Express response object.
@@ -32,11 +19,7 @@ export class CodeStream {
     buffer: string;         // Text waiting to be pushed to the response.
     noCodeFence: boolean;   // Whether the response is using code fences.
     finished: boolean;      // Whether the last code fence was received.
-
-    peerDependencies: Set<string>;
-    versionRequests: Queue; // A queue of requests to the npm registry.
-    versionResults: { [key: string]: string }; // A map of package names to their latest versions.
-    versionResultStatuses: { [key: string]: VersionResultStatus }; // A map of package names to their latest versions.
+    dependencyIndex: DependencyIndex; // A version fetcher for this response.
 
     constructor(res: Response) {
         this.buffer = '';
@@ -44,47 +27,10 @@ export class CodeStream {
         this.streamedCode = '';
         this.noCodeFence = false;
         this.finished = false;
-        this.versionRequests = new Queue();
-        this.versionResults = {};
-        this.peerDependencies = new Set();
-        // Ignore these three because they are already included in the template.
-        this.versionResultStatuses = {
-            "react": "loading",
-            "react-dom": "loading",
-            "react-scripts": "loading"
-        };
         this.res = res;
+
+        this.dependencyIndex = new DependencyIndex();
     }
-
-    private async fetchVersion(packageName: string) {
-        if (packageVersions.hasOwnProperty(packageName)) {
-            for (const [dependencyName, version] of Object.entries(packageVersions[packageName])) {
-                this.versionResults[dependencyName] = version;
-                this.versionResultStatuses[dependencyName] = "ready";
-            }
-            return;
-        }
-
-        // Ensure that we only make one request per package.
-        if (this.versionResultStatuses.hasOwnProperty(packageName)) return;
-        this.versionResultStatuses[packageName] = "loading";
-
-        // Add the version request to the queue.
-        this.versionRequests.addTask(async () => {
-            try {
-                const version = await mostRecentVersion(packageName, timeMachineDate);
-                this.versionResults[packageName] = version.version;
-                // Add all peer dependencies to the list of dependencies.
-                for (const key in version.peerDependencies) {
-                    this.peerDependencies.add(key);
-                }
-            } catch (error) {
-                console.error('Error fetching version for', packageName, error);
-                this.versionResults[packageName] = '*';
-            }
-            this.versionResultStatuses[packageName] = "ready";
-        });
-    };
 
     writeChunk(data: any) {
         this.res.write(JSON.stringify(data) + "\n");
@@ -92,14 +38,7 @@ export class CodeStream {
 
     // Push a list of dependencies to the client.
     private pushDependencies() {
-        // Find all dependencies that are ready to be sent.
-        const versionsToSend: { [key: string]: string } = {};
-        for (const packageName in this.versionResultStatuses) {
-            if (this.versionResultStatuses[packageName] === "ready") {
-                this.versionResultStatuses[packageName] = "sent";
-                versionsToSend[packageName] = this.versionResults[packageName];
-            }
-        }
+        const versionsToSend = this.dependencyIndex.dependencies();
         // Send the list of dependencies to the client.
         if (Object.keys(versionsToSend).length) {
             this.writeChunk({
@@ -154,7 +93,7 @@ export class CodeStream {
                     + inChunk.slice(0, currentNewline)
                 );
                 // Fetch version numbers for all new dependencies.
-                dependencies.forEach(dependency => this.fetchVersion(dependency));
+                dependencies.forEach(dependency => this.dependencyIndex.fetchVersion(dependency));
             }
 
             // Push the chunk to the client.
@@ -198,10 +137,10 @@ export class CodeStream {
         this.pushChunk(this.buffer + (this.noCodeFence ? "" : "\n"));
 
         // Fetch version numbers for all peer dependencies.
-        this.peerDependencies.forEach(dependency => this.fetchVersion(dependency));
+        this.dependencyIndex.peerDependencies.forEach(dependency => this.dependencyIndex.fetchVersion(dependency));
 
         // Send the remaining list of dependencies to the client.
-        await this.versionRequests.waitUntilFinished();
+        await this.dependencyIndex.versionRequests.waitUntilFinished();
         this.pushDependencies();
     }
 }
