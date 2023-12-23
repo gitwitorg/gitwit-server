@@ -3,6 +3,8 @@ import cors from 'cors'
 import OpenAI from 'openai';
 
 import { CodeStream } from './streaming';
+import { DependencyIndex } from './utils/dependencies';
+import { detectImportStatements } from './utils/codegen';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -118,6 +120,23 @@ app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
             }) + "\n");
         }
     }
+    res.end();
+});
+
+app.post('/dependencies', async (req: WithAuthProp<Request>, res: Response) => {
+    if ((req.auth.userId || req.body.userId) == undefined) {
+        res.status(400).json({ error: "userId is required" });
+        return;
+    }
+
+    const dependencyIndex = new DependencyIndex();
+    const dependencies = detectImportStatements(req.body.code);
+    dependencies.forEach(dependency => dependencyIndex.fetchVersion(dependency));
+    await dependencyIndex.versionRequests.waitUntilFinished();
+    dependencyIndex.peerDependencies.forEach(dependency => dependencyIndex.fetchVersion(dependency));
+    await dependencyIndex.versionRequests.waitUntilFinished();
+
+    res.write(JSON.stringify(dependencyIndex.dependencies()));
     res.end();
 });
 
