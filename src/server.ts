@@ -1,15 +1,13 @@
-import express, { Application, Request, Response } from 'express';
-import cors from 'cors'
-import OpenAI from 'openai';
+import express, { Application, Request, Response } from "express";
+import cors from "cors";
 
-import { CodeStream } from './streaming';
-import { DependencyIndex } from './utils/dependencies';
-import { detectImportStatements } from './utils/codegen';
+import { dependenciesFromCode, streamCodeGeneration } from "./index";
 
-import dotenv from 'dotenv';
-dotenv.config();
-
-import { ClerkExpressWithAuth, WithAuthProp, LooseAuthProp } from "@clerk/clerk-sdk-node";
+import {
+  ClerkExpressWithAuth,
+  WithAuthProp,
+  LooseAuthProp,
+} from "@clerk/clerk-sdk-node";
 
 // Create an Express application
 const app: Application = express();
@@ -26,121 +24,68 @@ app.use(express.json());
 app.use(ClerkExpressWithAuth());
 
 // Define a route handler for the root path
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello, World!');
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello, World!");
 });
-
-// Azure deployment details
-const azureDomain = "gitwit-production";
-const deployment = "gpt-35-turbo";
-const apiVersion = "2023-07-01-preview";
-
-// Components of the Azure OpenAI API request
-const defaultQuery = { "api-version": apiVersion };
-const headers = { "api-key": process.env.AZURE_API_KEY };
-
-// Create an Azure OpenAI client
-// Here, MOCK_API is used for a testing with a local mock server
-const openai = new OpenAI(
-    process.env.MOCK_API ? {
-        baseURL: process.env.MOCK_API
-    } : process.env.HELICONE_API_KEY ? {
-        baseURL: `https://oai.hconeai.com/openai/deployments/${deployment}`,
-        defaultHeaders: {
-            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-            "Helicone-OpenAI-API-Base": `https://${azureDomain}.openai.azure.com`,
-            ...headers
-        },
-        defaultQuery
-    } : {
-        baseURL: `https://${azureDomain}.openai.azure.com/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
-        defaultHeaders: headers,
-        defaultQuery
-    });
 
 // Define a route handler for the API endpoint
-app.post('/generate', async (req: WithAuthProp<Request>, res: Response) => {
-    if ((req.auth.userId || req.body.userId) == undefined) {
-        res.status(400).json({ error: "userId is required" });
-        return;
-    }
+app.post("/generate", async (req: WithAuthProp<Request>, res: Response) => {
+  if ((req.auth.userId || req.body.userId) == undefined) {
+    res.status(400).json({ error: "userId is required" });
+    return;
+  }
 
-    // If the user is logged in, use their Clerk ID, otherwise use a cookie
-    const userId = req.auth.userId ? req.auth.userId : `cookie:${req.body.userId}`;
+  // If the user is logged in, use their Clerk ID, otherwise use a cookie
+  const userId = req.auth.userId
+    ? req.auth.userId
+    : `cookie:${req.body.userId}`;
 
-    // Make a streaming request to the OpenAI API
-    let stream;
-    try {
-        // Create the prompt
-        const jsCode = "```javascript\n" + req.body.code + "\n```";
-        const instruction = "Take the above code and modify it to";
-        const stylePrompt = [
-            "Make minimal changes to the given code and return the complete code with the changes.",
-            "Do not include any setup or installation commands.",
-            "Do not add references to other files in the project.",
-            "Use ReactJS and Tailwind.",
-            "Do not add <svg>s.",
-            "If required, include and use external libraries.",
-            "If required, use composable programming patterns to reduce the amount of code.",
-            "Only if images are required for the given task, use placeholder URLs in the form of `https://via.placeholder.com/[WIDTH]x[HEIGHT]/[RRGGBB]/FFFFFF`.",
-            "After each imported library, add a comment giving the most recent library version like `// packagename@version`."
-        ].join(" ");
-        const prompt = [jsCode, instruction, req.body.command, stylePrompt].join("\n");
-        stream = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
-            messages: [{ role: 'user', content: prompt }],
-            stream: true,
-            user: userId
-        }, {
-            headers: {
-                // The rate limit is 100/IP address/minute
-                "Helicone-Property-IP": req.ip,
-                "Helicone-Property-Action": "Transform",
-                "Helicone-Property-Instruction": encodeURIComponent(req.body.command),
-                "Helicone-RateLimit-Policy": "100;w=60;s=ip"
-            }
-        });
-    } catch (e: any) {
-        console.log("Error creating stream:", e.message);
+  let headersSent = false;
+  await streamCodeGeneration({
+    inputCode: req.body.code,
+    command: req.body.command,
+    userId,
+    writeChunk: (data) => {
+      if (!headersSent)
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      headersSent = true;
+      res.write(JSON.stringify(data) + "\n");
+    },
+    errorHandler: (e) => {
+      if (headersSent) {
+        res.write(
+          JSON.stringify({
+            type: "error",
+            content: e.message,
+          }) + "\n"
+        );
+      } else {
         res.status(500).json({ error: e.message });
-    }
+      }
+    },
+    chatHeaders: {
+      // The rate limit is 100/IP address/minute
+      "Helicone-Property-IP": req.ip,
+      "Helicone-Property-Action": "Transform",
+      "Helicone-Property-Instruction": encodeURIComponent(req.body.command),
+      "Helicone-RateLimit-Policy": "100;w=60;s=ip",
+    },
+  });
 
-    // Stream the response back to the client
-    if (stream) {
-        try {
-            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-            const codeStream = new CodeStream(res);
-            await codeStream.pushStream(stream);
-        } catch (e: any) {
-            // If an error occurs after the stream has started:
-            console.log("Error streaming response:", e.message);
-            res.write(JSON.stringify({
-                "type": "error",
-                "content": e.message
-            }) + "\n");
-        }
-    }
-    res.end();
+  res.end();
 });
 
-app.post('/dependencies', async (req: WithAuthProp<Request>, res: Response) => {
-    if ((req.auth.userId || req.body.userId) == undefined) {
-        res.status(400).json({ error: "userId is required" });
-        return;
-    }
+app.post("/dependencies", async (req: WithAuthProp<Request>, res: Response) => {
+  if ((req.auth.userId || req.body.userId) == undefined) {
+    res.status(400).json({ error: "userId is required" });
+    return;
+  }
 
-    const dependencyIndex = new DependencyIndex();
-    const dependencies = detectImportStatements(req.body.code);
-    dependencies.forEach(dependency => dependencyIndex.fetchVersion(dependency));
-    await dependencyIndex.versionRequests.waitUntilFinished();
-    dependencyIndex.peerDependencies.forEach(dependency => dependencyIndex.fetchVersion(dependency));
-    await dependencyIndex.versionRequests.waitUntilFinished();
-
-    res.write(JSON.stringify(dependencyIndex.dependencies()));
-    res.end();
+  res.write(JSON.stringify(dependenciesFromCode(req.body.code)));
+  res.end();
 });
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+  console.log(`Server is listening on port ${port}`);
 });

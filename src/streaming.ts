@@ -1,4 +1,3 @@
-import { Response } from 'express';
 import { Stream } from 'openai/streaming';
 import { OpenAI } from 'openai'
 
@@ -11,9 +10,11 @@ const fencePattern = /\n?```.*\n/;
 
 // Define a regular expression to detect unfinished code fences.
 const partialFencePattern = /\n(`(`(`[^\n]*)?)?)?$/;
+
+export type Chunk = { type: string, content: any };
 export class CodeStream {
 
-    res: Response;          // The Express response object.
+    writeChunk: (outChunk: Chunk) => void;          // The Express response object.
     streamedText: string;   // All text received from the OpenAI API.
     streamedCode: string;   // All text sent to the client.
     buffer: string;         // Text waiting to be pushed to the response.
@@ -21,19 +22,15 @@ export class CodeStream {
     finished: boolean;      // Whether the last code fence was received.
     dependencyIndex: DependencyIndex; // A version fetcher for this response.
 
-    constructor(res: Response) {
+    constructor(writeChunk: (outChunk: Chunk) => void) {
         this.buffer = '';
         this.streamedText = '';
         this.streamedCode = '';
         this.noCodeFence = false;
         this.finished = false;
-        this.res = res;
+        this.writeChunk = writeChunk;
 
         this.dependencyIndex = new DependencyIndex();
-    }
-
-    writeChunk(data: any) {
-        this.res.write(JSON.stringify(data) + "\n");
     }
 
     // Push a list of dependencies to the client.
