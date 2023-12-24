@@ -6,7 +6,7 @@ export const mostRecentVersion = async (packageName: string, beforeDate: Date) =
     if (!response.ok) {
         throw new Error('Network response was not ok.');
     }
-    const responseData = await response.json();
+    const responseData : any = await response.json();
     const times = responseData.time;
 
     // Find the keys that are both in the time and versions objects.
