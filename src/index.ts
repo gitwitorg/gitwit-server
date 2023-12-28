@@ -77,6 +77,7 @@ export async function streamCodeGeneration({
     stream = await openai.chat.completions.create(
       {
         model: "gpt-3.5-turbo",
+        temperature: 0.5,
         messages: [{ role: "user", content: prompt }],
         stream: true,
         user: userId,
