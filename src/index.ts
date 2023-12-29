@@ -60,20 +60,19 @@ export async function streamCodeGeneration({
   let stream;
   try {
     // Create the prompt
-    const jsCode = "```javascript\n" + inputCode + "\n```";
-    const instruction = "Take the above code and modify it to";
-    const stylePrompt = [
-      "Make minimal changes to the given code and return the complete code with the changes.",
-      "Do not include any setup or installation commands.",
-      "Do not add references to other files in the project.",
-      "Use ReactJS and Tailwind.",
+    const prompt = [
+      "```javascript\n" + inputCode + "\n```",
+      "You are a a front-end developer working on a ReactJS and Tailwind project.",
+      "Your task is to take the above code (a complete file) and modify it to",
+      command,
+      "Make all of your changes within this single file, and do not assume any additional files.",
+      "Do not include any instructions aside from the code.",
+      "Additional guidelines:",
       "Do not add <svg>s.",
       "If required, include and use external libraries.",
       "If required, use composable programming patterns to reduce the amount of code.",
-      "Only if images are required for the given task, use placeholder URLs in the form of `https://via.placeholder.com/[WIDTH]x[HEIGHT]/[RRGGBB]/FFFFFF`.",
-      "After each imported library, add a comment giving the most recent library version like `// packagename@version`.",
-    ].join(" ");
-    const prompt = [jsCode, instruction, command, stylePrompt].join("\n");
+      "Only if images are required for the given task, use placeholder URLs in the form of `https://via.placeholder.com/[WIDTH]x[HEIGHT]/[RRGGBB]/FFFFFF`."
+    ].join("\n");
     stream = await openai.chat.completions.create(
       {
         model: "gpt-3.5-turbo",
