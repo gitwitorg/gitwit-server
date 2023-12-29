@@ -9,7 +9,8 @@ type VersionResultStatus = "loading" | "ready" | "sent";
 const packageVersions: Record<string, Record<string, string>> = {
     "react-router-dom": { "react-router-dom": "5.3.4" },
     "react-chartjs-2": { "react-chartjs-2": "3.2.0", "chart.js": "3.5.1" },
-    "react-webcam": { "react-webcam": "7.2.0" }
+    "react-webcam": { "react-webcam": "7.2.0" },
+    "react-map-gl": { "react-map-gl": "6.1.19" },
 };
 
 export class DependencyIndex {
