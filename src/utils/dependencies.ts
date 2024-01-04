@@ -16,6 +16,7 @@ const packageVersions: Record<string, Record<string, string>> = {
     "chart.js": { "chart.js": "2.9.4" },
     "react-hook-form": { "react-hook-form": "6.8.6" },
     "swiper": { "swiper": "11.0.5" },
+    "@material-ui/core": { "@material-ui/core": "4.12.4" },
 };
 
 export class DependencyIndex {
