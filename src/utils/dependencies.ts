@@ -6,11 +6,16 @@ const timeMachineDate = new Date('2021-09-01');
 
 type VersionResultStatus = "loading" | "ready" | "sent";
 
+// These are the newest versions of each package that are compatible with GPT-3.5.
 const packageVersions: Record<string, Record<string, string>> = {
     "react-router-dom": { "react-router-dom": "5.3.4" },
     "react-chartjs-2": { "react-chartjs-2": "3.2.0", "chart.js": "3.5.1" },
     "react-webcam": { "react-webcam": "7.2.0" },
     "react-map-gl": { "react-map-gl": "6.1.19" },
+    "reactstrap": { "reactstrap" : "8.10.0" },
+    "chart.js": { "chart.js": "2.9.4" },
+    "react-hook-form": { "react-hook-form": "6.8.6" },
+    "swiper": { "swiper": "11.0.5" },
 };
 
 export class DependencyIndex {
