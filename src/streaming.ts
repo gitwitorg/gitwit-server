@@ -11,6 +11,9 @@ const fencePattern = /\n?```.*\n/;
 // Define a regular expression to detect unfinished code fences.
 const partialFencePattern = /\n(`(`(`[^\n]*)?)?)?$/;
 
+// Define a regular expression to detect code fences at the end of a stream.
+const endsWithFence = /\n```$/;
+
 export type Chunk = { type: string, content: any };
 export class CodeStream {
 
@@ -129,9 +132,10 @@ export class CodeStream {
             }
         }
 
-        // If there is an unfinished code fence, push the buffer.
+        // If there is an unfinished or final code fence, push the buffer.
+        // Trim trailing fences because ChatGPT might add one even with no opening fence.
         // Add a newline to ensure that closing fences are recognized.
-        this.pushChunk(this.buffer + (this.noCodeFence ? "" : "\n"));
+        this.pushChunk(this.buffer.replace(endsWithFence, "") + (this.noCodeFence ? "" : "\n"));
 
         // Fetch version numbers for all peer dependencies.
         await this.dependencyIndex.versionRequests.waitUntilFinished();
