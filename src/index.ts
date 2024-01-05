@@ -68,6 +68,7 @@ export async function streamCodeGeneration({
       "Make all of your changes within this single file, and do not assume any additional files.",
       "Do not include any instructions aside from the code.",
       "Additional guidelines:",
+      "Use inline Tailwind classes, and do not use external CSS files.",
       "Do not add <svg>s.",
       "If required, include and use external libraries.",
       "If required, use composable programming patterns to reduce the amount of code.",
