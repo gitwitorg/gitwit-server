@@ -68,10 +68,11 @@ export async function streamCodeGeneration({
       "Make all of your changes within this single file, and do not assume any additional files.",
       "Do not include any instructions aside from the code.",
       "Additional guidelines:",
-      "Use inline Tailwind classes, and do not use external CSS files.",
-      "Do not add <svg>s.",
+      "Use inline Tailwind classes instead of external CSS files.",
+      "Use icon libraries instead of SVGs.",
+      "Never add <svg> tags.",
       "If required, include and use external libraries.",
-      "If required, use composable programming patterns to reduce the amount of code.",
+      "Create reusable React components where needed to reduce the amount of code.",
       "Only if images are required for the given task, use placeholder URLs in the form of `https://via.placeholder.com/[WIDTH]x[HEIGHT]/[RRGGBB]/FFFFFF`."
     ].join("\n");
     stream = await openai.chat.completions.create(
