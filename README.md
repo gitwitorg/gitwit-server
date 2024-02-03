@@ -1,6 +1,8 @@
 # GitWit Codegen Server
 
-This is an ExpressJS server with an API endpoint to make changes to code files while streaming the results.
+This is an ExpressJS server with an API endpoint to make changes to code files while streaming the results. It also handles detecting dependencies, and finding the matching versions for the LLM's knowledge cut-off.
+
+<img src="https://github.com/gitwitorg/gitwit-server/assets/33395784/bd60387d-a063-43f8-9a85-1f7e7c6542d6" alt="Overview" width="500" />
 
 ## Prerequisites
 
