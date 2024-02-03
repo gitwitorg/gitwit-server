@@ -17,7 +17,7 @@ Before running the server, you need to set the following environment variables:
 - `HELICONE_API_KEY`: (Optional) Your Helicone API key
 - `CLERK_API_KEY`: (Required) Your Clerk API key
 
-## Usage
+## Usage as a server
 
 To use, first install dependencies:
 
@@ -30,6 +30,21 @@ To run in production mode:
 To run in development mode:
 
 `yarn dev`
+
+## Usage as a library
+
+First, install gitwit-server in your project using `yarn link`.
+
+Then, usage is as follows:
+```typescript
+import { generateCode } from "gitwit-server";
+const { code: newAppDotJS, dependencies } = await generateCode(
+  appDotJS,
+  prompt
+);
+```
+
+This is mainly useful for running evaluations.
 
 ## Docker
 
