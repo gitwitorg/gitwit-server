@@ -18,6 +18,7 @@ const packageVersions: Record<string, Record<string, string>> = {
     "swiper": { "swiper": "11.0.5" },
     "@material-ui/core": { "@material-ui/core": "4.12.4" },
     "react-icons": { "react-icons": "4.11.0" },
+    "react-spinners": { "react-spinners": "0.13.8" },
 };
 
 export class DependencyIndex {
