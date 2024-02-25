@@ -21,7 +21,12 @@ const port = 3001;
 
 app.use(cors());
 app.use(express.json());
-app.use(ClerkExpressWithAuth());
+
+if (!process.env.TESTING) {
+  app.use(ClerkExpressWithAuth());
+} else {
+  console.log("Test mode: Authentication is disabled");
+}
 
 // Define a route handler for the root path
 app.get("/", (req: Request, res: Response) => {
@@ -30,15 +35,16 @@ app.get("/", (req: Request, res: Response) => {
 
 // Define a route handler for the API endpoint
 app.post("/generate", async (req: WithAuthProp<Request>, res: Response) => {
-  if ((req.auth.userId || req.body.userId) == undefined) {
-    res.status(400).json({ error: "userId is required" });
-    return;
-  }
+  let userId = "";
+  if (!process.env.TESTING) {
+    if ((req.auth.userId || req.body.userId) == undefined) {
+      res.status(400).json({ error: "userId is required" });
+      return;
+    }
 
-  // If the user is logged in, use their Clerk ID, otherwise use a cookie
-  const userId = req.auth.userId
-    ? req.auth.userId
-    : `cookie:${req.body.userId}`;
+    // If the user is logged in, use their Clerk ID, otherwise use a cookie
+    userId = req.auth.userId ? req.auth.userId : `cookie:${req.body.userId}`;
+  }
 
   let headersSent = false;
   await streamCodeGeneration({
@@ -49,6 +55,7 @@ app.post("/generate", async (req: WithAuthProp<Request>, res: Response) => {
       if (!headersSent)
         res.setHeader("Content-Type", "text/plain; charset=utf-8");
       headersSent = true;
+      console.log(data);
       res.write(JSON.stringify(data) + "\n");
     },
     errorHandler: (e) => {
