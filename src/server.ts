@@ -55,7 +55,7 @@ app.post("/generate", async (req: WithAuthProp<Request>, res: Response) => {
       if (!headersSent)
         res.setHeader("Content-Type", "text/plain; charset=utf-8");
       headersSent = true;
-      console.log(data);
+      if (process.env.TESTING) console.log(data);
       res.write(JSON.stringify(data) + "\n");
     },
     errorHandler: (e) => {
