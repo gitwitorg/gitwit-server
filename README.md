@@ -33,6 +33,21 @@ To run in development mode:
 
 `yarn dev`
 
+## Testing the API
+
+To run the server without authentication:
+
+`TESTING=true yarn dev`
+
+Below is an example API call without authentication:
+
+```bash
+curl 'http://localhost:3001/generate' \
+  -H 'content-type: application/json' \
+  --data-raw $'{"command":"Add a footer","code":"import React from \'react\'\\n\\nexport default function App() {\\n  return (\\n    <div className=\\"flex justify-center items-center h-screen\\">\\n        <h1 className=\\"font-semibold\\">\\n          Welcome to my app\u0021\\n        </h1>\\n    </div>\\n  )\\n}"}' \
+  --compressed
+```
+
 ## Usage as a library
 
 First, install gitwit-server in your project using `yarn link`.
