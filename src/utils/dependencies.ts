@@ -19,6 +19,7 @@ const packageVersions: Record<string, Record<string, string>> = {
     "@material-ui/core": { "@material-ui/core": "4.12.4" },
     "react-icons": { "react-icons": "4.11.0" },
     "react-spinners": { "react-spinners": "0.13.8" },
+    "react-feather": { "react-feather": "2.0.10" },
 };
 
 export class DependencyIndex {
