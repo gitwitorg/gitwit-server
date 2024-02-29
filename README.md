@@ -33,7 +33,7 @@ To run in development mode:
 
 `yarn dev`
 
-## Testing the API
+### Testing the API
 
 To run the server without authentication:
 
@@ -47,6 +47,14 @@ curl 'http://localhost:3001/generate' \
   --data-raw $'{"command":"Add a footer","code":"import React from \'react\'\\n\\nexport default function App() {\\n  return (\\n    <div className=\\"flex justify-center items-center h-screen\\">\\n        <h1 className=\\"font-semibold\\">\\n          Welcome to my app\u0021\\n        </h1>\\n    </div>\\n  )\\n}"}' \
   --compressed
 ```
+
+### Docker
+
+To run with Docker:
+
+`docker build -t gitwit-server .`
+
+`docker run -d -p 3001:3001 --env-file .env gitwit-server`
 
 ## Usage as a library
 
@@ -62,11 +70,3 @@ const { code: newAppDotJS, dependencies } = await generateCode(
 ```
 
 This is mainly useful for running evaluations.
-
-## Docker
-
-To run with Docker:
-
-`docker build -t gitwit-server .`
-
-`docker run -d -p 3001:3001 --env-file .env gitwit-server`
