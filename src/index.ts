@@ -6,38 +6,10 @@ import OpenAI from "openai";
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Azure deployment details
-const azureDomain = "gitwit-production";
-const deployment = "gpt-35-turbo";
-const apiVersion = "2023-07-01-preview";
+import apiConfiguration from "./utils/apiConfiguration";
 
-// Components of the Azure OpenAI API request
-const defaultQuery = { "api-version": apiVersion };
-const headers = { "api-key": process.env.AZURE_API_KEY };
-
-// Create an Azure OpenAI client
-// Here, MOCK_API is used for a testing with a local mock server
-const openai = new OpenAI(
-  process.env.MOCK_API
-    ? {
-        baseURL: process.env.MOCK_API,
-      }
-    : process.env.HELICONE_API_KEY
-    ? {
-        baseURL: `https://oai.hconeai.com/openai/deployments/${deployment}`,
-        defaultHeaders: {
-          "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-          "Helicone-OpenAI-API-Base": `https://${azureDomain}.openai.azure.com`,
-          ...headers,
-        },
-        defaultQuery,
-      }
-    : {
-        baseURL: `https://${azureDomain}.openai.azure.com/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
-        defaultHeaders: headers,
-        defaultQuery,
-      }
-);
+// Create an OpenAI client
+const openai = new OpenAI(apiConfiguration());
 
 type StreamCodeGenerationParams = {
   inputCode: string;
