@@ -1,7 +1,7 @@
 import { detectImportStatements } from "./utils/codegen";
 import { DependencyIndex } from "./utils/dependencies";
 import { CodeStream, Chunk } from "./streaming";
-import { CodeToFileStream } from './modularizedStreaming'; 
+import { CodeToFileStream } from "./modularizedStreaming"; 
 import OpenAI from "openai";
 
 import dotenv from 'dotenv';

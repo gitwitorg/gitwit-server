@@ -4,7 +4,7 @@ import { writeFile, mkdir, access, constants } from 'fs/promises'; // Import nec
 
 import path from 'path';
 
-const fileContentPattern = /File Name: (.+?)\n```javascript\n([\s\S]+?)\n```/gm;
+const fileContentPattern = /File Name: (.+?)\n+```[\s\S]+?\n([\s\S]+?)```/gm;
 
 
 export type ModularizedChunk = {
@@ -55,14 +55,17 @@ export class CodeToFileStream {
       console.log(`Full response saved.`);
 
       console.log(`Processing and saving individual files from the full response...`);
+      console.log(fullText)
       this.processAndSaveFiles(fullText);
   }
 
   processAndSaveFiles(fullText: string) {
       let match;
       while ((match = fileContentPattern.exec(fullText)) !== null) {
-          const [_, fileName, content] = match;
-          this.saveFile(fileName.trim(), content.trim()).catch(console.error);
+          const fileName = match[1].trim();
+          const content = match[2].trim();
+          console.log(`Found file: ${fileName}, preparing to save...`);
+          this.saveFile(fileName, content);
       }
   }
 
