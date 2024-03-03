@@ -1,26 +1,34 @@
+import React, { useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
-export default function TodoForm({ darkMode, handleAddTodo }) {
+export default function TodoForm({ onAddTodo }) {
   const [inputValue, setInputValue] = useState('')
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value)
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    handleAddTodo(inputValue)
+    onAddTodo && onAddTodo(inputValue)
     setInputValue('')
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`w-full max-w-md flex flex-col bg-white rounded-lg shadow-lg overflow-hidden ${darkMode ? 'text-white' : ''} px-4 py-2`}>
+    <form
+      className="flex w-full px-4 py-2 mb-5 bg-white rounded-lg shadow-md"
+      onSubmit={handleSubmit}
+    >
       <input
         type="text"
-        className={`w-full px-2 py-1 mr-2 rounded ${darkMode ? 'bg-gray-700 text-white' : ''}`}
         placeholder="Add a new todo"
+        className="w-full mr-4 py-2 px-3 rounded-md border border-gray-300"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={handleInputChange}
       />
       <button
-        className={`rounded-lg px-2 py-1 ${darkMode ? 'bg-gray-500' : 'bg-blue-500 text-white'}`}
         type="submit"
+        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
       >
         <FaPlus />
       </button>

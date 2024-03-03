@@ -1,12 +1,11 @@
-import { FaPlus, FaTrash, FaSun, FaMoon } from 'react-icons/fa'
+import React, { useState } from 'react'
 import TodoForm from './TodoForm'
 
 export default function App() {
   const [todos, setTodos] = useState([])
-  const [darkMode, setDarkMode] = useState(false)
 
   const handleAddTodo = (text) => {
-    if (text) {
+    if (text.trim() !== '') {
       setTodos([...todos, { id: Date.now(), text }])
     }
   }
@@ -15,35 +14,41 @@ export default function App() {
     setTodos(todos.filter((todo) => todo.id !== id))
   }
 
-  const handleDarkMode = () => {
-    setDarkMode(!darkMode)
-  }
-
   return (
-    <div className={`flex flex-col items-center h-screen ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-800'}`}>
-      <h1 className="text-3xl font-semibold my-8">Todo List</h1>
-      <TodoForm darkMode={darkMode} handleAddTodo={handleAddTodo} />
-      <ul className="divide-y divide-gray-200 w-full max-w-md flex flex-col bg-white rounded-lg shadow-lg overflow-hidden">
-        {todos.map((todo) => (
-          <li key={todo.id} className={`flex items-center justify-between px-4 py-2 ${darkMode ? 'bg-gray-700' : ''}`}>
-            <span className={`${darkMode ? 'text-white' : ''}`}>{todo.text}</span>
-            <button
-              className={`text-red-500 ${darkMode ? 'text-red-200' : ''}`}
-              onClick={() => handleDeleteTodo(todo.id)}
+    <div className="flex flex-col items-center h-screen bg-gray-100">
+      <h1 className="text-3xl font-bold mt-10 mb-5">Todo List</h1>
+      <TodoForm onAddTodo={handleAddTodo} />
+      {todos.length > 0 ? (
+        <ul className="w-full max-w-md">
+          {todos.map((todo) => (
+            <li
+              key={todo.id}
+              className="flex justify-between items-center py-2 px-4 bg-white rounded-md shadow-md mb-2"
             >
-              <FaTrash />
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="flex items-center mt-4">
-        <button
-          className={`rounded-lg px-2 py-1 ${darkMode ? 'bg-gray-500' : 'bg-blue-500 text-white'}`}
-          onClick={handleDarkMode}
-        >
-          {darkMode ? <FaSun /> : <FaMoon />}
-        </button>
-      </div>
+              <span className="text-lg">{todo.text}</span>
+              <button
+                className="text-red-500 hover:text-red-600"
+                onClick={() => handleDeleteTodo(todo.id)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3.707 5.293a1 1 0 011.414 0L10 10.586l4.293-4.293a1 1 0 111.414 1.414L11.414 12l4.293 4.293a1 1 0 01-1.414 1.414L10 13.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 12 4.293 7.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-lg text-gray-500">No todos yet. Add one above!</p>
+      )}
     </div>
   )
 }

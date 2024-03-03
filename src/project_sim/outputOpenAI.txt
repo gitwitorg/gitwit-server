@@ -18,17 +18,15 @@ project/
 
 File Name: App.js
 
-```
+```jsx
 import React, { useState } from 'react'
-import { FaPlus, FaTrash, FaSun, FaMoon } from 'react-icons/fa'
 import TodoForm from './TodoForm'
 
 export default function App() {
   const [todos, setTodos] = useState([])
-  const [darkMode, setDarkMode] = useState(false)
 
   const handleAddTodo = (text) => {
-    if (text) {
+    if (text.trim() !== '') {
       setTodos([...todos, { id: Date.now(), text }])
     }
   }
@@ -37,35 +35,41 @@ export default function App() {
     setTodos(todos.filter((todo) => todo.id !== id))
   }
 
-  const handleDarkMode = () => {
-    setDarkMode(!darkMode)
-  }
-
   return (
-    <div className={`flex flex-col items-center h-screen ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-800'}`}>
-      <h1 className="text-3xl font-semibold my-8">Todo List</h1>
-      <TodoForm darkMode={darkMode} handleAddTodo={handleAddTodo} />
-      <ul className="divide-y divide-gray-200 w-full max-w-md flex flex-col bg-white rounded-lg shadow-lg overflow-hidden">
-        {todos.map((todo) => (
-          <li key={todo.id} className={`flex items-center justify-between px-4 py-2 ${darkMode ? 'bg-gray-700' : ''}`}>
-            <span className={`${darkMode ? 'text-white' : ''}`}>{todo.text}</span>
-            <button
-              className={`text-red-500 ${darkMode ? 'text-red-200' : ''}`}
-              onClick={() => handleDeleteTodo(todo.id)}
+    <div className="flex flex-col items-center h-screen bg-gray-100">
+      <h1 className="text-3xl font-bold mt-10 mb-5">Todo List</h1>
+      <TodoForm onAddTodo={handleAddTodo} />
+      {todos.length > 0 ? (
+        <ul className="w-full max-w-md">
+          {todos.map((todo) => (
+            <li
+              key={todo.id}
+              className="flex justify-between items-center py-2 px-4 bg-white rounded-md shadow-md mb-2"
             >
-              <FaTrash />
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="flex items-center mt-4">
-        <button
-          className={`rounded-lg px-2 py-1 ${darkMode ? 'bg-gray-500' : 'bg-blue-500 text-white'}`}
-          onClick={handleDarkMode}
-        >
-          {darkMode ? <FaSun /> : <FaMoon />}
-        </button>
-      </div>
+              <span className="text-lg">{todo.text}</span>
+              <button
+                className="text-red-500 hover:text-red-600"
+                onClick={() => handleDeleteTodo(todo.id)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3.707 5.293a1 1 0 011.414 0L10 10.586l4.293-4.293a1 1 0 111.414 1.414L11.414 12l4.293 4.293a1 1 0 01-1.414 1.414L10 13.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 12 4.293 7.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-lg text-gray-500">No todos yet. Add one above!</p>
+      )}
     </div>
   )
 }
@@ -73,31 +77,38 @@ export default function App() {
 
 File Name: TodoForm.js
 
-```
+```jsx
 import React, { useState } from 'react'
 import { FaPlus } from 'react-icons/fa'
 
-export default function TodoForm({ darkMode, handleAddTodo }) {
+export default function TodoForm({ onAddTodo }) {
   const [inputValue, setInputValue] = useState('')
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value)
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    handleAddTodo(inputValue)
+    onAddTodo && onAddTodo(inputValue)
     setInputValue('')
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`w-full max-w-md flex flex-col bg-white rounded-lg shadow-lg overflow-hidden ${darkMode ? 'text-white' : ''} px-4 py-2`}>
+    <form
+      className="flex w-full px-4 py-2 mb-5 bg-white rounded-lg shadow-md"
+      onSubmit={handleSubmit}
+    >
       <input
         type="text"
-        className={`w-full px-2 py-1 mr-2 rounded ${darkMode ? 'bg-gray-700 text-white' : ''}`}
         placeholder="Add a new todo"
+        className="w-full mr-4 py-2 px-3 rounded-md border border-gray-300"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={handleInputChange}
       />
       <button
-        className={`rounded-lg px-2 py-1 ${darkMode ? 'bg-gray-500' : 'bg-blue-500 text-white'}`}
         type="submit"
+        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
       >
         <FaPlus />
       </button>
@@ -107,7 +118,8 @@ export default function TodoForm({ darkMode, handleAddTodo }) {
 ```
 
 **Guidelines:**
-- Created a new file named TodoForm.js within the src/ directory for modularization.
-- Moved the input field and add button from App.js to TodoForm.js.
-- Passed darkMode and handleAddTodo as props to TodoForm.js.
-- Updated App.js to import TodoForm.js and use it within the return statement.
+- Created a new file named TodoForm.js to handle the form and input for adding new todos.
+- Moved the form and input elements from App.js to TodoForm.js.
+- Passed the handleAddTodo function from App.js to TodoForm.js as a prop.
+- Imported TodoForm component in App.js and rendered it instead of the form and input elements.
+- Updated the handleAddTodo function in App.js to accept a text parameter instead of using the inputValue state.
