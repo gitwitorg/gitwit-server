@@ -53,6 +53,7 @@ const apiConfiguration = () => {
         // Use OpenAI with Helicone for logging:
         console.log("Connecting to OpenAI API with Helicone.")
         return {
+          baseURL: "http://oai.hconeai.com/v1",
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
           },
