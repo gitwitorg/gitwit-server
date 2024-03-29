@@ -144,7 +144,7 @@ export async function modularizeCodeGeneration({
   if (stream) {
     try {
       // Specify the path where you want to save the output
-      const outputFilePath = '/home/aman23/gitwit_ws/gitwit-test/template/src/';
+      const outputFilePath = '/home/aman23/gitwit_ws/gitwit-server/src/gitwit-test/template/src/';
 
       // Use the CodeToFileStream class to write the output to a file
       const fileStream = new CodeToFileStream(outputFilePath);
