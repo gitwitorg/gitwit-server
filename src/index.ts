@@ -93,12 +93,16 @@ export async function modularizeCodeGeneration({
     \`\`\`
 
     **Objective:**
-    Modularize the current proejct within the src/ directory, ensuring functional integrity. You are only allwoed to make new .js files for modularisation within the src folder you cannot make directories within src
+    Modularize the current project within the src/ , ensuring functional integrity. You are strictly only allowed to make 1 new .js files for modularisation within the src folder you cannot make directories within src
+
+    **Strict Instructions:**
+    1. Make only one new file
 
     **Modularization Instructions:**
-    1. Create only one more new .js file within src/ for each modularization step. Do not create new folders.
-    2. Address any errors before proceeding to further modularization.
-    3. Provide updated project tree and file contents after each step.
+    1. Create STRICTLY only 1 more new .js file within src/ for each modularization step (thsi being a step). Do not create new folders.
+    2. Cannot make any new folders or directories within src/ 
+    3. Address any errors before proceeding to further modularization.
+    4. Provide updated project tree and file contents after each step.
 
     **Expected Output Format:**
     - **Project Tree:** Updated project tree structure.
@@ -140,7 +144,7 @@ export async function modularizeCodeGeneration({
   if (stream) {
     try {
       // Specify the path where you want to save the output
-      const outputFilePath = '/home/aman23/gitwit_ws/gitwit-server/src/project_sim/';
+      const outputFilePath = '/home/aman23/gitwit_ws/gitwit-test/template/src/';
 
       // Use the CodeToFileStream class to write the output to a file
       const fileStream = new CodeToFileStream(outputFilePath);

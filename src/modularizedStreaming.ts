@@ -4,7 +4,7 @@ import { writeFile, mkdir, access, constants } from 'fs/promises'; // Import nec
 
 import path from 'path';
 
-const fileContentPattern = /File Name: (.+?)\n+```[\s\S]+?\n([\s\S]+?)```/gm;
+const fileContentPattern = /File Name: (.*?)\n```(?:javascript)?\n([\s\S]*?)\n```/gm;
 
 
 export type ModularizedChunk = {
