@@ -13,7 +13,7 @@ const apiConfiguration = () => {
     if (process.env.AZURE_API_KEY) {
       // Azure deployment details
       const azureDomain = "gitwit-production";
-      const deployment = "gpt-35-turbo";
+      const deployment = "gpt-4o";
       const apiVersion = "2023-07-01-preview";
   
       if (process.env.HELICONE_API_KEY) {
